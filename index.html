@@ -1,0 +1,3594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Tournament - Sistema de Vendas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Exo 2', 'Orbitron', monospace;
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 25%, #111111 50%, #0d0d0d 75%, #000000 100%);
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        .morphing-gradient {
+            background: linear-gradient(-45deg, #1e3a8a, #1e40af, #0891b2, #1e3a8a);
+            background-size: 400% 400%;
+            animation: morphingGradient 8s ease infinite;
+        }
+        
+        @keyframes morphingGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+            animation: pulseGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
+            to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+        }
+        
+        .flowing-border {
+            border: 2px solid transparent;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(15, 15, 15, 0.95)) padding-box,
+                        linear-gradient(135deg, #1e3a8a, #1e40af, #0891b2, #1e3a8a) border-box;
+            background-size: 400% 400%;
+            animation: flowingBorder 6s ease infinite;
+        }
+        
+        @keyframes flowingBorder {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .card-3d {
+            transition: all 0.3s ease;
+        }
+        
+        .card-3d:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);
+        }
+        
+        .gamer-glow {
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(34, 211, 238, 0.1);
+            animation: gamerPulse 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes gamerPulse {
+            0% { 
+                box-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(34, 211, 238, 0.1);
+            }
+            100% { 
+                box-shadow: 0 0 30px rgba(34, 211, 238, 0.8), 0 0 60px rgba(59, 130, 246, 0.6), inset 0 0 30px rgba(34, 211, 238, 0.2);
+            }
+        }
+        
+        .futuristic-text {
+            font-family: 'Rajdhani', monospace;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .tab-button {
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .product-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.5rem;
+            margin-top: 0.25rem;
+            max-height: 16rem;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .category-selected {
+            border-color: #3b82f6 !important;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(30, 58, 138, 0.1)) !important;
+        }
+        
+        .rank-1 { 
+            background: linear-gradient(135deg, #ffd700, #ffed4e); 
+            color: #000 !important; 
+            border: 2px solid #d97706;
+        }
+        .rank-2 { 
+            background: linear-gradient(135deg, #e5e7eb, #9ca3af); 
+            color: #000 !important; 
+            border: 2px solid #6b7280;
+        }
+        .rank-3 { 
+            background: linear-gradient(135deg, #cd7c2f, #92400e); 
+            color: #fff !important; 
+            border: 2px solid #78350f;
+        }
+        
+        .rank-1 *, .rank-2 * {
+            color: #000 !important;
+        }
+        
+        .rank-3 * {
+            color: #fff !important;
+        }
+        
+        .message-item {
+            transition: all 0.3s ease;
+        }
+        
+        .message-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
+        }
+        
+        .message-unread {
+            border-left: 4px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .message-read {
+            border-left: 4px solid #64748b;
+            background: rgba(100, 116, 139, 0.05);
+        }
+        
+        .filter-btn.active {
+            background: #3b82f6 !important;
+        }
+        
+        .neon-progress {
+            animation: neonPulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes neonPulse {
+            0% {
+                box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+            }
+            100% {
+                box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+            }
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Header -->
+    <header class="bg-black/80 backdrop-blur-xl flowing-border sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 py-2 sm:py-4">
+            <div class="flex items-center justify-between gap-2 sm:gap-4">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <button id="addSellerBtn" class="morphing-gradient w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold glow transition-all card-3d futuristic-text">
+                        +
+                    </button>
+                    <button id="rulesBtn" class="morphing-gradient w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold glow transition-all card-3d futuristic-text">
+                        📋
+                    </button>
+                    <button id="messagesBtn" class="morphing-gradient w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold glow transition-all card-3d futuristic-text relative">
+                        💬
+                        <span id="messagesBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold hidden">0</span>
+                    </button>
+                </div>
+                <h1 class="text-lg sm:text-2xl lg:text-3xl font-black text-transparent bg-clip-text morphing-gradient futuristic-text">
+                    ⭐ TORNEIO DE VENDAS
+                </h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-slate-900/40 backdrop-blur-lg border-b border-blue-500/30">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="flex space-x-2">
+                <button id="dashboardTab" class="tab-button active px-4 sm:px-6 py-3 font-bold transition-all futuristic-text">
+                    + VENDAS
+                </button>
+                <button id="rankingTab" class="tab-button px-4 sm:px-6 py-3 font-bold transition-all futuristic-text">
+                    🏆 RANKINGS
+                </button>
+                <button id="performanceTab" class="tab-button px-4 sm:px-6 py-3 font-bold transition-all futuristic-text">
+                    📊 PERFORMANCE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <!-- Dashboard Content -->
+        <div id="dashboardContent">
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-slate-800/30 flowing-border rounded-xl p-3 sm:p-6 card-3d">
+                    <div class="text-transparent bg-clip-text morphing-gradient text-xs sm:text-sm font-bold mb-2 futuristic-text">
+                        👥 VENDEDORES ATIVOS
+                    </div>
+                    <div class="text-xl sm:text-3xl font-black text-white" id="totalSellers">0</div>
+                </div>
+                <div class="bg-slate-800/30 flowing-border rounded-xl p-3 sm:p-6 card-3d">
+                    <div class="text-transparent bg-clip-text morphing-gradient text-xs sm:text-sm font-bold mb-2 futuristic-text">
+                        ⭐ PONTOS TOTAIS
+                    </div>
+                    <div class="text-xl sm:text-3xl font-black text-white" id="totalPoints">0</div>
+                </div>
+                <div class="bg-slate-800/30 flowing-border rounded-xl p-3 sm:p-6 card-3d">
+                    <div class="text-transparent bg-clip-text morphing-gradient text-xs sm:text-sm font-bold mb-2 futuristic-text">
+                        📈 VENDAS TOTAIS
+                    </div>
+                    <div class="text-xl sm:text-3xl font-black text-white" id="totalSales">0</div>
+                </div>
+                <div class="bg-slate-800/30 flowing-border rounded-xl p-3 sm:p-6 card-3d">
+                    <div class="text-transparent bg-clip-text morphing-gradient text-xs sm:text-sm font-bold mb-2 futuristic-text">
+                        💰 FATURAMENTO TOTAL
+                    </div>
+                    <div class="text-xl sm:text-3xl font-black text-white" id="totalRevenue">R$ 0</div>
+                </div>
+            </div>
+
+            <!-- Registrar Vendas Card -->
+            <div class="bg-slate-800/30 flowing-border rounded-xl p-4 sm:p-6 mb-6">
+                <h2 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text morphing-gradient mb-4 sm:mb-6 futuristic-text">
+                    📝 REGISTRAR VENDAS
+                </h2>
+                
+                <!-- Seller Selection -->
+                <div class="mb-6">
+                    <label class="block text-blue-300 text-sm font-bold mb-2 futuristic-text">VENDEDOR</label>
+                    <div class="flex gap-3">
+                        <select id="dashboardSellerSelect" class="flex-1 bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all" required>
+                            <option value="">Selecione um vendedor</option>
+                        </select>
+                        <button id="deleteSelectedSellerBtn" onclick="deleteSelectedSeller()" disabled class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 hover:border-red-500 text-red-400 hover:text-red-300 px-4 py-3 rounded-lg font-bold transition-all card-3d futuristic-text disabled:opacity-50 disabled:cursor-not-allowed" title="Excluir vendedor selecionado">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product Categories -->
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
+                    <!-- Lentes -->
+                    <div class="relative">
+                        <button type="button" id="lentesBtn" class="category-btn w-full bg-slate-700/20 backdrop-blur-sm flowing-border rounded-lg p-3 sm:p-4 text-left hover:bg-slate-600/30 transition-all card-3d">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="text-2xl mb-2">👓</div>
+                                <h3 class="text-transparent bg-clip-text morphing-gradient font-bold text-sm sm:text-base futuristic-text">
+                                    LENTES
+                                </h3>
+                                <div class="text-xs sm:text-sm text-slate-300 mt-1" id="lentesSelected">Clique para selecionar</div>
+                            </div>
+                        </button>
+                        <div id="lentesDropdown" class="product-dropdown hidden">
+                            <!-- Products will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Materiais -->
+                    <div class="relative">
+                        <button type="button" id="materiaisBtn" class="category-btn w-full bg-slate-700/20 backdrop-blur-sm flowing-border rounded-lg p-3 sm:p-4 text-left hover:bg-slate-600/30 transition-all card-3d">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="text-2xl mb-2">💎</div>
+                                <h3 class="text-transparent bg-clip-text morphing-gradient font-bold text-sm sm:text-base futuristic-text">
+                                    MATERIAIS
+                                </h3>
+                                <div class="text-xs sm:text-sm text-slate-300 mt-1" id="materiaisSelected">Clique para selecionar</div>
+                            </div>
+                        </button>
+                        <div id="materiaisDropdown" class="product-dropdown hidden">
+                            <!-- Products will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Tratamentos AR -->
+                    <div class="relative">
+                        <button type="button" id="tratamentosBtn" class="category-btn w-full bg-slate-700/20 backdrop-blur-sm flowing-border rounded-lg p-3 sm:p-4 text-left hover:bg-slate-600/30 transition-all card-3d">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="text-2xl mb-2">✨</div>
+                                <h3 class="text-transparent bg-clip-text morphing-gradient font-bold text-sm sm:text-base futuristic-text">
+                                    TRATAMENTOS
+                                </h3>
+                                <div class="text-xs sm:text-sm text-slate-300 mt-1" id="tratamentosSelected">Clique para selecionar</div>
+                            </div>
+                        </button>
+                        <div id="tratamentosDropdown" class="product-dropdown hidden">
+                            <!-- Products will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Sensity -->
+                    <div class="relative">
+                        <button type="button" id="sensityBtn" class="category-btn w-full bg-slate-700/20 backdrop-blur-sm flowing-border rounded-lg p-3 sm:p-4 text-left hover:bg-slate-600/30 transition-all card-3d">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="text-2xl mb-2">🌞</div>
+                                <h3 class="text-transparent bg-clip-text morphing-gradient font-bold text-sm sm:text-base futuristic-text">
+                                    SENSITY
+                                </h3>
+                                <div class="text-xs sm:text-sm text-slate-300 mt-1" id="sensitySelected">Clique para selecionar</div>
+                            </div>
+                        </button>
+                        <div id="sensityDropdown" class="product-dropdown hidden">
+                            <!-- Products will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Products Summary -->
+                <div id="selectedProductsSummary" class="bg-slate-600/30 flowing-border rounded-lg p-4 mb-6 hidden">
+                    <h4 class="text-yellow-400 font-bold mb-3 futuristic-text">📋 PRODUTOS SELECIONADOS</h4>
+                    <div id="selectedProductsList" class="space-y-2 mb-4">
+                        <!-- Selected products will appear here -->
+                    </div>
+                    <div class="flex justify-between items-center font-bold text-lg">
+                        <span class="futuristic-text">TOTAL DE PONTOS:</span>
+                        <span id="totalSelectedPoints" class="text-yellow-400">0 pts</span>
+                    </div>
+                </div>
+
+                <!-- Sale Form -->
+                <div id="saleForm" class="hidden">
+                    <!-- Sale Form Fields -->
+                    <div class="bg-slate-600/20 flowing-border rounded-lg p-4 mb-6">
+                        <h4 class="text-cyan-400 font-bold mb-4 futuristic-text">💰 DADOS DA VENDA</h4>
+                        
+                        <!-- Grade 3x3 dos campos -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <!-- Linha 1 -->
+                            <!-- ID do Pedido -->
+                            <div>
+                                <label class="block text-blue-300 text-sm font-bold mb-2 futuristic-text">ID DO PEDIDO</label>
+                                <input type="number" id="dashboardQuantity" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all" placeholder="Digite o ID do pedido" required min="1" step="1">
+                            </div>
+                            
+                            <!-- Valor da Lente -->
+                            <div>
+                                <label class="block text-purple-300 text-sm font-bold mb-2 futuristic-text">VALOR DA LENTE (R$)</label>
+                                <input type="number" id="lensValue" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none backdrop-blur-sm transition-all" step="0.01" placeholder="0,00" oninput="calculateTotal()">
+                            </div>
+                            
+                            <!-- Valor da Armação -->
+                            <div>
+                                <label class="block text-green-300 text-sm font-bold mb-2 futuristic-text">VALOR DA ARMAÇÃO (R$)</label>
+                                <input type="number" id="frameValue" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none backdrop-blur-sm transition-all" step="0.01" placeholder="0,00" oninput="calculateTotal()">
+                            </div>
+                            
+                            <!-- Linha 2 -->
+                            <!-- Desconto em Reais -->
+                            <div>
+                                <label class="block text-red-300 text-sm font-bold mb-2 futuristic-text">DESCONTO (R$)</label>
+                                <input type="number" id="discountValue" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none backdrop-blur-sm transition-all" step="0.01" placeholder="0,00" oninput="calculateTotal()">
+                            </div>
+                            
+                            <!-- Desconto em Porcentagem -->
+                            <div>
+                                <label class="block text-yellow-300 text-sm font-bold mb-2 futuristic-text">DESCONTO (%)</label>
+                                <input type="number" id="discountPercentageField" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none backdrop-blur-sm transition-all" step="0.01" placeholder="0,00" readonly>
+                            </div>
+                            
+                            <!-- Valor Total -->
+                            <div>
+                                <label class="block text-cyan-300 text-sm font-bold mb-2 futuristic-text">VALOR TOTAL (R$)</label>
+                                <input type="number" id="dashboardValue" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none backdrop-blur-sm transition-all" step="0.01" required readonly>
+                            </div>
+                            
+                            <!-- Linha 3 - Observações ocupando toda a largura -->
+                            <div class="md:col-span-3">
+                                <label class="block text-blue-300 text-sm font-bold mb-2 futuristic-text">OBSERVAÇÕES</label>
+                                <input type="text" id="dashboardDescription" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all" placeholder="Observações opcionais">
+                            </div>
+                        </div>
+                        
+                        <!-- Cálculo Visual -->
+                        <div class="bg-slate-700/30 rounded-lg p-3">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-sm futuristic-text">CÁLCULO:</span>
+                                <span id="calculationDisplay" class="text-slate-300 text-sm">R$ 0,00 + R$ 0,00 - R$ 0,00 = R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-blue-300 text-sm font-bold mb-2 futuristic-text">OBSERVAÇÕES</label>
+                        <input type="text" id="dashboardDescription" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all" placeholder="Observações opcionais">
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                        <button type="button" id="cancelSaleForm" class="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 px-6 py-3 rounded-lg font-bold transition-all card-3d futuristic-text">
+                            CANCELAR
+                        </button>
+                        <button type="button" id="submitSaleForm" class="flex-1 morphing-gradient px-6 py-3 rounded-lg font-bold glow transition-all card-3d futuristic-text">
+                            🚀 REGISTRAR VENDA
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rankings Content -->
+        <div id="rankingContent" class="hidden">
+            <div class="bg-slate-800/50 flowing-border rounded-xl p-4 sm:p-6 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+                    <h2 class="text-xl sm:text-2xl font-black text-blue-400 futuristic-text">
+                        🏆 RANKING GERAL
+                    </h2>
+                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                        <!-- Date Filter -->
+                        <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                            <label class="text-blue-300 text-sm font-bold futuristic-text">📅 PERÍODO:</label>
+                            <select id="dateFilter" class="bg-slate-700/50 flowing-border rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all">
+                                <option value="all">TODOS OS TEMPOS</option>
+                                <option value="today">HOJE</option>
+                                <option value="yesterday">ONTEM</option>
+                                <option value="week">ESTA SEMANA</option>
+                                <option value="lastWeek">SEMANA PASSADA</option>
+                                <option value="month">ESTE MÊS</option>
+                                <option value="lastMonth">MÊS PASSADO</option>
+                                <option value="custom">PERSONALIZADO</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="exportRankingExcel" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 px-4 py-2 rounded-lg font-bold text-sm transition-all card-3d futuristic-text">
+                                📊 EXPORTAR EXCEL
+                            </button>
+                            <button id="exportRankingPNG" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 px-4 py-2 rounded-lg font-bold text-sm transition-all card-3d futuristic-text">
+                                📸 EXPORTAR PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Custom Date Range -->
+                <div id="customDateRange" class="hidden mb-4 p-4 bg-slate-700/30 flowing-border rounded-lg">
+                    <div class="flex flex-col sm:flex-row gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="block text-blue-300 text-sm font-bold mb-2 futuristic-text">DATA INICIAL</label>
+                            <input type="date" id="startDateFilter" class="w-full bg-slate-700/50 flowing-border rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-blue-300 text-sm font-bold mb-2 futuristic-text">DATA FINAL</label>
+                            <input type="date" id="endDateFilter" class="w-full bg-slate-700/50 flowing-border rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all">
+                        </div>
+                        <button id="applyCustomFilter" class="morphing-gradient px-4 py-2 rounded-lg font-bold text-sm transition-all card-3d futuristic-text">
+                            APLICAR
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filter Summary -->
+                <div id="filterSummary" class="hidden mb-4 p-3 bg-blue-600/20 flowing-border rounded-lg">
+                    <div class="text-blue-300 text-sm font-bold futuristic-text" id="filterSummaryText"></div>
+                </div>
+                
+                <div id="overallRanking" class="space-y-3 sm:space-y-4">
+                    <div class="text-center text-slate-400 py-8 futuristic-text">Adicione vendedores para ver o ranking</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Content -->
+        <div id="performanceContent" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl sm:text-2xl font-black text-orange-400 futuristic-text">
+                    📊 RELATÓRIO DE PERFORMANCE
+                </h2>
+                <div class="flex gap-2">
+                    <button id="exportPerformancePNG" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 px-4 py-2 rounded-lg font-bold text-sm transition-all card-3d futuristic-text">
+                        📸 EXPORTAR DADOS EM PNG
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Performers -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="bg-slate-800/50 flowing-border rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-black text-green-400 mb-4 futuristic-text">🥇 TOP PERFORMERS</h3>
+                    <div class="space-y-3">
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm text-yellow-400 futuristic-text">👑 LÍDER GERAL</div>
+                                    <div class="text-xs text-slate-300" id="topOverall">-</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-yellow-400" id="topOverallPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm text-blue-400 futuristic-text">👓 REI DAS LENTES</div>
+                                    <div class="text-xs text-slate-300" id="topLenses">-</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-blue-400" id="topLensesPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm text-purple-400 futuristic-text">💎 MESTRE DOS MATERIAIS</div>
+                                    <div class="text-xs text-slate-300" id="topMaterials">-</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-purple-400" id="topMaterialsPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm text-cyan-400 futuristic-text">🌞 SENSITY CHAMPION</div>
+                                    <div class="text-xs text-slate-300" id="topSensity">-</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-cyan-400" id="topSensityPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm text-green-400 futuristic-text">✨ MESTRE ANTIRREFLEXO</div>
+                                    <div class="text-xs text-slate-300" id="topTreatments">-</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-green-400" id="topTreatmentsPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discount Ranking -->
+                <div class="bg-slate-800/30 flowing-border rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-black text-red-400 mb-4 futuristic-text">💰 RANKING MENOR DESCONTO</h3>
+                    <div id="discountRanking" class="space-y-3">
+                        <div class="text-center text-slate-400 py-4">Carregando ranking...</div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="bg-slate-800/50 flowing-border rounded-xl p-4 sm:p-6">
+                    <h3 class="text-lg sm:text-xl font-black text-orange-400 mb-4 futuristic-text">📈 ESTATÍSTICAS DETALHADAS</h3>
+                    <div class="space-y-3">
+                        <!-- Estatísticas Gerais -->
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">Média de Pontos por Vendedor</div>
+                                <div class="font-bold text-orange-400" id="avgPoints">0</div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">Média de Vendas por Vendedor</div>
+                                <div class="font-bold text-orange-400" id="avgSales">0</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Top Performers por Categoria -->
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">💰 Maior Conversor em Valores</div>
+                                <div class="text-right">
+                                    <div class="font-bold text-green-400" id="topValueConverter">-</div>
+                                    <div class="text-xs text-slate-400" id="topValueAmount">R$ 0</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">📊 Maior Média de Valores</div>
+                                <div class="text-right">
+                                    <div class="font-bold text-blue-400" id="topAvgValue">-</div>
+                                    <div class="text-xs text-slate-400" id="topAvgValueAmount">R$ 0/venda</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">👓 Especialista em Lentes Premium</div>
+                                <div class="text-right">
+                                    <div class="font-bold text-cyan-400" id="topPremiumLenses">-</div>
+                                    <div class="text-xs text-slate-400" id="topPremiumLensesPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">💎 Especialista em Materiais Premium</div>
+                                <div class="text-right">
+                                    <div class="font-bold text-purple-400" id="topPremiumMaterials">-</div>
+                                    <div class="text-xs text-slate-400" id="topPremiumMaterialsPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">✨ Especialista em Tratamentos Premium</div>
+                                <div class="text-right">
+                                    <div class="font-bold text-yellow-400" id="topPremiumTreatments">-</div>
+                                    <div class="text-xs text-slate-400" id="topPremiumTreatmentsPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">🌞 Especialista em Sensity Premium</div>
+                                <div class="text-right">
+                                    <div class="font-bold text-orange-400" id="topPremiumSensity">-</div>
+                                    <div class="text-xs text-slate-400" id="topPremiumSensityPoints">0 pts</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-700/50 flowing-border rounded-lg p-3 card-3d">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-sm futuristic-text">🏆 Produto Mais Vendido</div>
+                                <div class="text-right">
+                                    <div class="font-bold text-pink-400" id="topProduct">-</div>
+                                    <div class="text-xs text-slate-400" id="topProductCount">0 vendas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Seller Modal -->
+    <div id="addSellerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800/90 backdrop-blur-xl flowing-border rounded-xl p-6 sm:p-8 max-w-md w-full">
+            <h3 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text morphing-gradient mb-4 sm:mb-6 futuristic-text">👤 CADASTRAR VENDEDOR</h3>
+            <form id="addSellerForm">
+                <div class="mb-6">
+                    <label class="block text-green-300 text-sm font-bold mb-2 futuristic-text">NOME DO VENDEDOR</label>
+                    <input type="text" id="sellerName" class="w-full bg-slate-700/50 flowing-border rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none backdrop-blur-sm transition-all" placeholder="Digite o nome completo" required>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <button type="button" id="cancelBtn" class="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 px-6 py-3 rounded-lg font-bold transition-all card-3d futuristic-text">
+                        CANCELAR
+                    </button>
+                    <button type="submit" class="flex-1 morphing-gradient px-6 py-3 rounded-lg font-bold glow transition-all card-3d futuristic-text">
+                        ✨ CADASTRAR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Messages Modal -->
+    <div id="messagesModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800/90 backdrop-blur-xl flowing-border rounded-xl p-6 sm:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl sm:text-2xl font-black text-blue-400 futuristic-text">💬 CENTRAL DE MENSAGENS</h3>
+                <div class="flex items-center gap-4">
+                    <button id="markAllReadBtn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-bold transition-all futuristic-text">
+                        ✅ MARCAR TODAS COMO LIDAS
+                    </button>
+                    <button id="closeMessagesBtn" class="text-slate-400 hover:text-white text-2xl transition-colors">×</button>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex gap-2 mb-4">
+                    <button id="filterAll" class="filter-btn active bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm font-bold transition-all futuristic-text">
+                        TODAS
+                    </button>
+                    <button id="filterRanking" class="filter-btn bg-slate-600 hover:bg-slate-700 px-3 py-1 rounded text-sm font-bold transition-all futuristic-text">
+                        🏆 RANKING
+                    </button>
+                    <button id="filterChallenges" class="filter-btn bg-slate-600 hover:bg-slate-700 px-3 py-1 rounded text-sm font-bold transition-all futuristic-text">
+                        🎯 DESAFIOS
+                    </button>
+                    <button id="filterPerformance" class="filter-btn bg-slate-600 hover:bg-slate-700 px-3 py-1 rounded text-sm font-bold transition-all futuristic-text">
+                        📊 PERFORMANCE
+                    </button>
+                    <button id="filterAlerts" class="filter-btn bg-slate-600 hover:bg-slate-700 px-3 py-1 rounded text-sm font-bold transition-all futuristic-text">
+                        ⚠️ ALERTAS
+                    </button>
+                </div>
+            </div>
+            
+            <div id="messagesList" class="space-y-3 max-h-96 overflow-y-auto">
+                <div class="text-center text-slate-400 py-8 futuristic-text">Nenhuma mensagem no momento</div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Rules Modal -->
+    <div id="rulesModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800/90 backdrop-blur-xl flowing-border rounded-xl p-6 sm:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl sm:text-2xl font-black text-blue-400 futuristic-text">📋 REGRAS DO TORNEIO</h3>
+                <button id="closeRulesBtn" class="text-slate-400 hover:text-white text-2xl transition-colors">×</button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
+
+
+                <!-- Lenses Points -->
+                <div class="bg-slate-700/30 flowing-border rounded-lg p-4 card-3d">
+                    <h4 class="text-blue-400 font-bold mb-3 futuristic-text">👓 PONTUAÇÃO POR LENTES</h4>
+                    <div class="grid grid-cols-2 gap-1 text-xs">
+                        <div>• MiYoSmart: <span class="text-green-400">100 pts</span></div>
+                        <div>• Myself: <span class="text-green-400">90 pts</span></div>
+                        <div>• MyStyle: <span class="text-green-400">80 pts</span></div>
+                        <div>• WorkStyle: <span class="text-green-400">70 pts</span></div>
+                        <div>• Lifestyle: <span class="text-green-400">70 pts</span></div>
+                        <div>• Enroute: <span class="text-green-400">60 pts</span></div>
+                        <div>• Balanssis: <span class="text-green-400">60 pts</span></div>
+                        <div>• Daynamic: <span class="text-green-400">50 pts</span></div>
+                        <div>• Sync: <span class="text-green-400">40 pts</span></div>
+                        <div>• Nulux ID V+: <span class="text-green-400">40 pts</span></div>
+                        <div>• Nulux trueform: <span class="text-green-400">30 pts</span></div>
+                        <div>• Maxxee: <span class="text-green-400">20 pts</span></div>
+                        <div>• Nulux surfaçadas: <span class="text-green-400">15 pts</span></div>
+                        <div>• Hilux surfaçadas: <span class="text-green-400">15 pts</span></div>
+                        <div>• Nulux Visão Simples: <span class="text-green-400">10 pts</span></div>
+                        <div>• Hilux Visão Simples: <span class="text-green-400">10 pts</span></div>
+                    </div>
+                </div>
+
+                <!-- Materials -->
+                <div class="bg-slate-700/30 flowing-border rounded-lg p-4 card-3d">
+                    <h4 class="text-blue-400 font-bold mb-3 futuristic-text">💎 MATERIAIS</h4>
+                    <ul class="space-y-1 text-slate-300 text-xs">
+                        <li>• 1.74 EYVIA: <span class="text-green-400">70 pts</span></li>
+                        <li>• 1.67 EYNOA: <span class="text-green-400">60 pts</span></li>
+                        <li>• 1.60 EYAS 2.0: <span class="text-green-400">50 pts</span></li>
+                        <li>• 1.59 POLI: <span class="text-green-400">40 pts</span></li>
+                        <li>• 1.53 PNX: <span class="text-green-400">35 pts</span></li>
+                        <li>• 1.50 ORGANIC: <span class="text-green-400">30 pts</span></li>
+                    </ul>
+                </div>
+
+                <!-- AR Treatments -->
+                <div class="bg-slate-700/30 flowing-border rounded-lg p-4 card-3d">
+                    <h4 class="text-blue-400 font-bold mb-3 futuristic-text">✨ TRATAMENTOS AR</h4>
+                    <ul class="space-y-1 text-slate-300 text-xs">
+                        <li>• Meiryo: <span class="text-green-400">70 pts</span></li>
+                        <li>• AR MiYoSmart: <span class="text-green-400">70 pts</span></li>
+                        <li>• SunPro: <span class="text-green-400">60 pts</span></li>
+                        <li>• LongLife: <span class="text-green-400">50 pts</span></li>
+                        <li>• BlueControl: <span class="text-green-400">40 pts</span></li>
+                        <li>• NoRisk: <span class="text-green-400">30 pts</span></li>
+                    </ul>
+                </div>
+
+                <!-- Sensity -->
+                <div class="bg-slate-700/30 flowing-border rounded-lg p-4 card-3d">
+                    <h4 class="text-blue-400 font-bold mb-3 futuristic-text">🌞 SENSITY (FOTOSSENSÍVEL)</h4>
+                    <ul class="space-y-1 text-slate-300 text-xs">
+                        <li>• Chameleon: <span class="text-green-400">70 pts</span></li>
+                        <li>• Sensity Shine: <span class="text-green-400">60 pts</span></li>
+                        <li>• Sensity Dark: <span class="text-green-400">55 pts</span></li>
+                        <li>• Sensity Fast: <span class="text-green-400">50 pts</span></li>
+                        <li>• Sensity 2: <span class="text-green-400">45 pts</span></li>
+                        <li>• Sensity Original: <span class="text-green-400">40 pts</span></li>
+                    </ul>
+                </div>
+
+                <!-- Challenges -->
+                <div class="bg-slate-700/30 flowing-border rounded-lg p-4 lg:col-span-2 card-3d">
+                    <h4 class="text-blue-400 font-bold mb-3 futuristic-text">🎯 DESAFIOS E BÔNUS</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-green-400 font-bold text-xs mb-1 futuristic-text">SEMANAIS:</div>
+                            <ul class="space-y-1 text-slate-300 text-xs">
+                                <li>• MiYoSmart: 6 vendas = +1000 pts</li>
+                                <li>• Variedade: 6 tipos diferentes = +500 pts</li>
+                                <li>• Premium 1.74: 3 lentes = +600 pts</li>
+                                <li>• Sensity: 6 lentes fotossensíveis = +400 pts</li>
+                                <li>• Desconto até 5%: 10 vendas ≤5% = +100 pts</li>
+                                <li>• Desconto Zerado: 10 vendas 0% = +250 pts</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div class="text-red-400 font-bold text-xs mb-1 futuristic-text">BÔNUS POR VENDA:</div>
+                            <ul class="space-y-1 text-slate-300 text-xs">
+                                <li>• Sem desconto (0%) = +50 pts</li>
+                                <li>• Desconto baixo (≤5%) = +20 pts</li>
+                            </ul>
+                            <div class="text-purple-400 font-bold text-xs mb-1 mt-3 futuristic-text">BÔNUS SEMANAL:</div>
+                            <ul class="space-y-1 text-slate-300 text-xs">
+                                <li>• 1º lugar menor desconto = +150 pts</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div class="text-yellow-400 font-bold text-xs mb-1 futuristic-text">MENSAIS:</div>
+                            <ul class="space-y-1 text-slate-300 text-xs">
+                                <li>• Meta Pontos: 20.000 pts = +1000 pts</li>
+                                <li>• Meta Vendas: 50 vendas = +800 pts</li>
+                                <li>• Meta Sensity: 15 lentes = +700 pts</li>
+                                <li>• Antirreflexo: 15 Meiryo/AR = +900 pts</li>
+                                <li>• MySelf: 2 vendas = +800 pts</li>
+                                <li>• Lifestyle: 3 vendas = +800 pts</li>
+                                <li>• MiYoSmart: 15 vendas = +800 pts</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seller Profile Modal -->
+    <div id="sellerProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800/90 backdrop-blur-xl flowing-border rounded-xl p-6 sm:p-8 max-w-7xl w-full max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-xl sm:text-2xl font-black text-blue-400 futuristic-text">👤 PERFIL</h3>
+                    <button id="exportSellerPNG" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 px-4 py-2 rounded-lg font-bold text-sm transition-all card-3d futuristic-text">
+                        📸 EXPORTAR DADOS EM PNG
+                    </button>
+                </div>
+                <button id="closeSellerProfileBtn" class="text-slate-400 hover:text-white text-2xl transition-colors">×</button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Profile Info -->
+                <div class="lg:col-span-1">
+                    <div class="bg-slate-700/30 flowing-border rounded-lg p-6 text-center mb-6">
+                        <div id="sellerProfileAvatar" class="w-20 h-20 morphing-gradient rounded-full flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4 cursor-pointer hover:scale-110 transition-transform" onclick="triggerPhotoUpload()">
+                            N
+                        </div>
+                        <input type="file" id="photoUpload" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                        <h4 id="sellerProfileName" class="text-xl font-black text-white futuristic-text mb-2">NATAN</h4>
+                        <p class="text-sm text-slate-400 mb-4 cursor-pointer hover:text-blue-400 transition-colors" onclick="triggerPhotoUpload()">📷 Clique para alterar foto</p>
+                        
+                        <div class="bg-slate-600/30 rounded-lg p-4">
+                            <h5 class="text-blue-400 font-bold mb-3 futuristic-text">📊 PONTOS POR CATEGORIA</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>👓 Lentes:</span>
+                                    <span id="sellerLentesPoints" class="text-blue-300 font-bold">0 pts</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>💎 Materiais:</span>
+                                    <span id="sellerMateriaisPoints" class="text-purple-300 font-bold">0 pts</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>✨ Tratamentos:</span>
+                                    <span id="sellerTratamentosPoints" class="text-green-300 font-bold">0 pts</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>🌞 Sensity:</span>
+                                    <span id="sellerSensityPoints" class="text-orange-300 font-bold">0 pts</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>🎯 Desafios:</span>
+                                    <span id="sellerChallengePoints" class="text-yellow-300 font-bold">0 pts</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-600/30 rounded-lg p-4 mt-4">
+                            <h5 class="text-green-400 font-bold mb-3 futuristic-text">📈 ESTATÍSTICAS</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Média por Venda:</span>
+                                    <span id="sellerAvgPoints" class="text-green-300 font-bold">0 pts</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Valor Médio:</span>
+                                    <span id="sellerAvgValue" class="text-green-300 font-bold">R$ 0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Cadastrado em:</span>
+                                    <span id="sellerJoinDate" class="text-slate-300">25/09/2025</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Última Venda:</span>
+                                    <span id="sellerLastSale" class="text-slate-300">Nenhuma</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Média de Desconto:</span>
+                                    <span id="sellerAvgDiscount" class="text-red-300 font-bold">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Desafios Completos:</span>
+                                    <span id="sellerCompletedChallenges" class="text-yellow-300 font-bold">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-600/30 rounded-lg p-4 mt-4">
+                            <h5 class="text-purple-400 font-bold mb-3 futuristic-text">🎯 ESPECIALISTA</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>👓 Lente:</span>
+                                    <span id="sellerTopLens" class="text-blue-300 font-bold">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>💎 Material:</span>
+                                    <span id="sellerTopMaterial" class="text-purple-300 font-bold">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>✨ Tratamento:</span>
+                                    <span id="sellerTopTreatment" class="text-green-300 font-bold">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>🌞 Sensity:</span>
+                                    <span id="sellerTopSensity" class="text-orange-300 font-bold">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Challenges -->
+                <div class="lg:col-span-3">
+                    <!-- Weekly Challenges -->
+                    <div class="bg-slate-700/30 flowing-border rounded-lg p-4 mb-6">
+                        <h5 class="text-yellow-400 font-bold mb-4 futuristic-text">📅 DESAFIOS SEMANAIS</h5>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">👓</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">MiYoSmart Master</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="miyosmartProgress">0/6</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="miyosmartProgressBar" class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-500 shadow-lg shadow-blue-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+1000 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">🌈</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Variedade Champion</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="varietyProgress">0/6</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="varietyProgressBar" class="h-full bg-gradient-to-r from-purple-500 to-pink-400 rounded-full transition-all duration-500 shadow-lg shadow-purple-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+500 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">💎</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">1.74 Master</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="premium174Progress">0/3</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="premium174ProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 shadow-lg shadow-emerald-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+600 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">🌞</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Sensity Specialist</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="sensityWeeklyProgress">0/6</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="sensityWeeklyProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full transition-all duration-500 shadow-lg shadow-orange-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+400 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">💰</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Desconto até 5%</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="lowDiscountProgress">0/10</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="lowDiscountProgressBar" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500 shadow-lg shadow-green-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+100 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">💰</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Desconto Zerado</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="zeroDiscountProgress">0/10</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="zeroDiscountProgressBar" class="h-full bg-gradient-to-r from-yellow-500 to-gold-400 rounded-full transition-all duration-500 shadow-lg shadow-yellow-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+250 pts</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Monthly Challenges -->
+                    <div class="bg-slate-700/30 flowing-border rounded-lg p-4 mb-6">
+                        <h5 class="text-orange-400 font-bold mb-4 futuristic-text">📆 DESAFIOS MENSAIS</h5>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">⭐</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Meta de Pontos</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="pointsGoalProgress">0/20.000</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="pointsGoalProgressBar" class="h-full bg-gradient-to-r from-yellow-500 to-amber-400 rounded-full transition-all duration-500 shadow-lg shadow-yellow-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+1000 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">📈</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Meta de Vendas</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="salesGoalProgress">0/50</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="salesGoalProgressBar" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500 shadow-lg shadow-green-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+800 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">🌞</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Sensity Master</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="sensityMonthlyProgress">0/15</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="sensityMonthlyProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-red-400 rounded-full transition-all duration-500 shadow-lg shadow-orange-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+700 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">✨</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Meiryo Expert</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="meiryoProgress">0/15</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="meiryoProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-400 rounded-full transition-all duration-500 shadow-lg shadow-cyan-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+900 pts</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quarterly Challenges -->
+                    <div class="bg-slate-700/30 flowing-border rounded-lg p-4 mb-6">
+                        <h5 class="text-purple-400 font-bold mb-4 futuristic-text">📊 DESAFIOS TRIMESTRAIS</h5>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">👑</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">MySelf Champion</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="myselfProgress">0/6</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="myselfProgressBar" class="h-full bg-gradient-to-r from-purple-500 to-violet-400 rounded-full transition-all duration-500 shadow-lg shadow-purple-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+800 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">🎯</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">Lifestyle Master</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="lifestyleProgress">0/6</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="lifestyleProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-blue-400 rounded-full transition-all duration-500 shadow-lg shadow-indigo-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+800 pts</div>
+                            </div>
+                            <div class="bg-slate-600/30 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">🏆</span>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-sm futuristic-text">MiYoSmart Expert</div>
+                                        <div class="text-xs text-slate-400 mb-2" id="miyosmartExpertProgress">0/15</div>
+                                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div id="miyosmartExpertProgressBar" class="h-full bg-gradient-to-r from-rose-500 to-pink-400 rounded-full transition-all duration-500 shadow-lg shadow-rose-500/50" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold text-sm">+800 pts</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Sales -->
+                    <div class="bg-slate-700/30 flowing-border rounded-lg p-4">
+                        <h5 class="text-cyan-400 font-bold mb-4 futuristic-text">🛒 VENDAS RECENTES</h5>
+                        <div id="sellerRecentSales" class="space-y-3">
+                            <div class="text-center text-slate-400 py-4">Nenhuma venda registrada</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Sale Confirmation Modal -->
+    <div id="deleteSaleModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800/90 backdrop-blur-xl flowing-border rounded-xl p-6 sm:p-8 max-w-md w-full">
+            <h3 class="text-xl sm:text-2xl font-black text-red-400 mb-4 sm:mb-6 futuristic-text">⚠️ CONFIRMAR EXCLUSÃO</h3>
+            <div class="mb-6">
+                <p class="text-slate-300 mb-4">Tem certeza que deseja excluir esta venda?</p>
+                <div id="deleteSaleInfo" class="bg-slate-700/50 rounded-lg p-4 text-sm">
+                    <!-- Sale info will be populated here -->
+                </div>
+                <p class="text-red-400 text-sm mt-4 font-bold">⚠️ Esta ação não pode ser desfeita!</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button type="button" id="cancelDeleteSale" class="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 px-6 py-3 rounded-lg font-bold transition-all card-3d futuristic-text">
+                    CANCELAR
+                </button>
+                <button type="button" id="confirmDeleteSale" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 px-6 py-3 rounded-lg font-bold transition-all card-3d futuristic-text">
+                    🗑️ EXCLUIR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Seller Confirmation Modal -->
+    <div id="deleteSellerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800/90 backdrop-blur-xl flowing-border rounded-xl p-6 sm:p-8 max-w-md w-full">
+            <h3 class="text-xl sm:text-2xl font-black text-red-400 mb-4 sm:mb-6 futuristic-text">⚠️ EXCLUIR VENDEDOR</h3>
+            <div class="mb-6">
+                <p class="text-slate-300 mb-4">Tem certeza que deseja excluir este vendedor?</p>
+                <div id="deleteSellerInfo" class="bg-slate-700/50 rounded-lg p-4 text-sm">
+                    <!-- Seller info will be populated here -->
+                </div>
+                <div class="bg-red-600/20 border border-red-500/50 rounded-lg p-4 mt-4">
+                    <p class="text-red-300 text-sm font-bold mb-2">⚠️ ATENÇÃO: Esta ação irá:</p>
+                    <ul class="text-red-300 text-sm space-y-1">
+                        <li>• Excluir permanentemente o vendedor</li>
+                        <li>• Remover todas as suas vendas</li>
+                        <li>• Apagar todo o histórico de pontos</li>
+                        <li>• Esta ação NÃO PODE ser desfeita!</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button type="button" id="cancelDeleteSeller" class="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 px-6 py-3 rounded-lg font-bold transition-all card-3d futuristic-text">
+                    CANCELAR
+                </button>
+                <button type="button" id="confirmDeleteSeller" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 px-6 py-3 rounded-lg font-bold transition-all card-3d futuristic-text">
+                    🗑️ EXCLUIR VENDEDOR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="fixed top-4 right-4 bg-green-600/90 backdrop-blur-xl text-white px-6 py-4 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 hidden">
+        <div class="flex items-center gap-2">
+            <span class="text-xl">✅</span>
+            <span id="successMessageText" class="futuristic-text">Operação realizada com sucesso!</span>
+        </div>
+    </div>
+
+    <script>
+        // Product database with points
+        const products = {
+            lentes: {
+                'MiYoSmart': 100,
+                'Myself': 90,
+                'MyStyle': 80,
+                'WorkStyle': 70,
+                'Lifestyle': 70,
+                'Enroute': 60,
+                'Balanssis': 60,
+                'Daynamic': 50,
+                'Sync': 40,
+                'Nulux ID V+': 40,
+                'Nulux trueform': 30,
+                'Maxxee': 20,
+                'Nulux surfaçadas': 15,
+                'Hilux surfaçadas': 15,
+                'Nulux Visão Simples': 10,
+                'Hilux Visão Simples': 10
+            },
+            materiais: {
+                '1.74 EYVIA': 70,
+                '1.67 EYNOA': 60,
+                '1.60 EYAS 2.0': 50,
+                '1.59 POLI': 40,
+                '1.53 PNX': 35,
+                '1.50 ORGANIC': 30
+            },
+            tratamentos: {
+                'Meiryo': 70,
+                'AR MiYoSmart': 70,
+                'SunPro': 60,
+                'LongLife': 50,
+                'BlueControl': 40,
+                'NoRisk': 30
+            },
+            sensity: {
+                'Chameleon': 70,
+                'Sensity Shine': 60,
+                'Sensity Dark': 55,
+                'Sensity Fast': 50,
+                'Sensity 2': 45,
+                'Sensity Original': 40
+            }
+        };
+
+        // Global variables
+        let sellers = [];
+        let selectedProducts = {};
+        let currentTab = 'dashboard';
+        let messages = [];
+        let currentMessageFilter = 'all';
+        let lastRankingPositions = {};
+        let tournamentDates = {
+            startDate: null,
+            endDate: null
+        };
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando aplicação...');
+            
+            loadData();
+            initializeApp();
+        });
+
+
+
+        function loadData() {
+            try {
+                const savedSellers = localStorage.getItem('sellers');
+                if (savedSellers) {
+                    sellers = JSON.parse(savedSellers);
+                    console.log('📊 Dados carregados:', sellers.length, 'vendedores');
+                } else {
+                    sellers = [];
+                    console.log('📊 Nenhum dado salvo encontrado');
+                }
+
+                // Load messages
+                const savedMessages = localStorage.getItem('messages');
+                if (savedMessages) {
+                    messages = JSON.parse(savedMessages);
+                } else {
+                    messages = [];
+                }
+
+                // Load last ranking positions
+                const savedPositions = localStorage.getItem('lastRankingPositions');
+                if (savedPositions) {
+                    lastRankingPositions = JSON.parse(savedPositions);
+                } else {
+                    lastRankingPositions = {};
+                }
+
+                // Load tournament dates
+                const savedDates = localStorage.getItem('tournamentDates');
+                if (savedDates) {
+                    tournamentDates = JSON.parse(savedDates);
+                } else {
+                    tournamentDates = { startDate: null, endDate: null };
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                sellers = [];
+                messages = [];
+                lastRankingPositions = {};
+                tournamentDates = { startDate: null, endDate: null };
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('sellers', JSON.stringify(sellers));
+                localStorage.setItem('messages', JSON.stringify(messages));
+                localStorage.setItem('lastRankingPositions', JSON.stringify(lastRankingPositions));
+                localStorage.setItem('tournamentDates', JSON.stringify(tournamentDates));
+                console.log('💾 Dados salvos com sucesso');
+            } catch (error) {
+                console.error('❌ Erro ao salvar dados:', error);
+            }
+        }
+
+        function initializeApp() {
+            setupEventListeners();
+            updateStats();
+            updateSellerSelect();
+            updateMessagesBadge();
+            generateInitialMessages();
+            console.log('✅ Aplicação inicializada com sucesso!');
+        }
+
+        function setupEventListeners() {
+            // Tab buttons
+            document.getElementById('dashboardTab').addEventListener('click', () => switchTab('dashboard'));
+            document.getElementById('rankingTab').addEventListener('click', () => switchTab('ranking'));
+            document.getElementById('performanceTab').addEventListener('click', () => switchTab('performance'));
+
+            // Modal buttons
+            document.getElementById('addSellerBtn').addEventListener('click', () => showModal('addSellerModal'));
+            document.getElementById('rulesBtn').addEventListener('click', () => showModal('rulesModal'));
+            document.getElementById('messagesBtn').addEventListener('click', () => showModal('messagesModal'));
+
+            document.getElementById('cancelBtn').addEventListener('click', () => hideModal('addSellerModal'));
+            document.getElementById('closeRulesBtn').addEventListener('click', () => hideModal('rulesModal'));
+            document.getElementById('closeMessagesBtn').addEventListener('click', () => hideModal('messagesModal'));
+            document.getElementById('closeSellerProfileBtn').addEventListener('click', () => hideModal('sellerProfileModal'));
+
+            document.getElementById('markAllReadBtn').addEventListener('click', markAllMessagesAsRead);
+            document.getElementById('exportSellerPNG').addEventListener('click', exportSellerToPNG);
+
+            // Delete sale modal buttons
+            document.getElementById('cancelDeleteSale').addEventListener('click', () => hideModal('deleteSaleModal'));
+            document.getElementById('confirmDeleteSale').addEventListener('click', executeSaleDeletion);
+
+            // Delete seller modal buttons
+            document.getElementById('cancelDeleteSeller').addEventListener('click', () => hideModal('deleteSellerModal'));
+            document.getElementById('confirmDeleteSeller').addEventListener('click', executeSellerDeletion);
+
+            // Category buttons
+            document.getElementById('lentesBtn').addEventListener('click', () => toggleDropdown('lentes'));
+            document.getElementById('materiaisBtn').addEventListener('click', () => toggleDropdown('materiais'));
+            document.getElementById('tratamentosBtn').addEventListener('click', () => toggleDropdown('tratamentos'));
+            document.getElementById('sensityBtn').addEventListener('click', () => toggleDropdown('sensity'));
+
+            // Sale form buttons
+            document.getElementById('cancelSaleForm').addEventListener('click', resetSaleForm);
+            document.getElementById('submitSaleForm').addEventListener('click', submitSale);
+
+            // Add seller form
+            document.getElementById('addSellerForm').addEventListener('submit', handleAddSeller);
+            
+
+
+            // Date filter
+            document.getElementById('dateFilter').addEventListener('change', handleDateFilterChange);
+            document.getElementById('applyCustomFilter').addEventListener('click', applyCustomDateFilter);
+
+            // Export buttons
+            document.getElementById('exportRankingExcel').addEventListener('click', exportRankingToExcel);
+            document.getElementById('exportRankingPNG').addEventListener('click', exportRankingToPNG);
+            document.getElementById('exportPerformancePNG').addEventListener('click', exportPerformanceToPNG);
+
+            // Message filter buttons
+            document.getElementById('filterAll').addEventListener('click', () => setMessageFilter('all'));
+            document.getElementById('filterRanking').addEventListener('click', () => setMessageFilter('ranking'));
+            document.getElementById('filterChallenges').addEventListener('click', () => setMessageFilter('challenges'));
+            document.getElementById('filterPerformance').addEventListener('click', () => setMessageFilter('performance'));
+            document.getElementById('filterAlerts').addEventListener('click', () => setMessageFilter('alerts'));
+
+            // Seller selection change handler
+            document.getElementById('dashboardSellerSelect').addEventListener('change', handleSellerSelectionChange);
+
+            // Click outside to close dropdowns
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.category-btn') && !e.target.closest('.product-dropdown')) {
+                    closeAllDropdowns();
+                }
+            });
+        }
+
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            if (modalId === 'messagesModal') {
+                displayMessages();
+            }
+        }
+
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.getElementById('dashboardTab').classList.toggle('active', tab === 'dashboard');
+            document.getElementById('rankingTab').classList.toggle('active', tab === 'ranking');
+            document.getElementById('performanceTab').classList.toggle('active', tab === 'performance');
+            
+            // Update content visibility
+            document.getElementById('dashboardContent').classList.toggle('hidden', tab !== 'dashboard');
+            document.getElementById('rankingContent').classList.toggle('hidden', tab !== 'ranking');
+            document.getElementById('performanceContent').classList.toggle('hidden', tab !== 'performance');
+            
+            if (tab === 'ranking') {
+                updateRankingsPage();
+            } else if (tab === 'performance') {
+                updatePerformancePage();
+            }
+        }
+
+        function toggleDropdown(category) {
+            console.log(`Toggling dropdown: ${category}`);
+            
+            const dropdown = document.getElementById(`${category}Dropdown`);
+            const isHidden = dropdown.classList.contains('hidden');
+            
+            // Close all dropdowns first
+            closeAllDropdowns();
+            
+            if (isHidden) {
+                // Populate and show dropdown
+                populateDropdown(category);
+                dropdown.classList.remove('hidden');
+            }
+        }
+
+        function closeAllDropdowns() {
+            const dropdowns = ['lentesDropdown', 'materiaisDropdown', 'tratamentosDropdown', 'sensityDropdown'];
+            dropdowns.forEach(id => {
+                const dropdown = document.getElementById(id);
+                dropdown.classList.add('hidden');
+            });
+        }
+
+        function populateDropdown(category) {
+            console.log(`Populating dropdown: ${category}`);
+            
+            const dropdown = document.getElementById(`${category}Dropdown`);
+            dropdown.innerHTML = '';
+            
+            if (!products[category]) {
+                console.error(`No products found for category: ${category}`);
+                return;
+            }
+            
+            // Add header
+            const header = document.createElement('div');
+            header.className = 'px-4 py-2 bg-blue-600/20 text-blue-300 text-xs border-b border-slate-700 font-bold futuristic-text';
+            header.textContent = `${Object.keys(products[category]).length} produtos disponíveis`;
+            dropdown.appendChild(header);
+            
+            // Add products
+            Object.entries(products[category]).forEach(([productName, points]) => {
+                const isSelected = selectedProducts[category] && selectedProducts[category].name === productName;
+                
+                const productDiv = document.createElement('div');
+                productDiv.className = `px-4 py-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700 last:border-b-0 transition-all card-3d ${isSelected ? 'bg-green-600/20 text-green-300' : 'text-white'}`;
+                productDiv.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-sm futuristic-text">${productName}</div>
+                            <div class="text-xs text-slate-400">${points} pontos por unidade</div>
+                        </div>
+                        ${isSelected ? '<div class="text-green-400 text-sm font-bold futuristic-text">✓ SELECIONADO</div>' : ''}
+                    </div>
+                `;
+                
+                productDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectProduct(productName, points, category);
+                    closeAllDropdowns();
+                });
+                
+                dropdown.appendChild(productDiv);
+            });
+        }
+
+        function selectProduct(productName, points, category) {
+            console.log(`Selecting product: ${productName} (${points}pts) from ${category}`);
+            
+            // Update selection
+            selectedProducts[category] = {
+                name: productName,
+                points: points
+            };
+            
+            // Update category display
+            updateCategoryDisplay(category, productName);
+            
+            // Update summary
+            updateSelectedProductsSummary();
+        }
+
+        function updateCategoryDisplay(category, productName) {
+            const selectedElement = document.getElementById(`${category}Selected`);
+            const categoryBtn = document.getElementById(`${category}Btn`);
+            
+            selectedElement.textContent = productName;
+            categoryBtn.classList.add('category-selected');
+        }
+
+        function updateSelectedProductsSummary() {
+            const summaryDiv = document.getElementById('selectedProductsSummary');
+            const listDiv = document.getElementById('selectedProductsList');
+            const totalPointsSpan = document.getElementById('totalSelectedPoints');
+            
+            // Clear previous content
+            listDiv.innerHTML = '';
+            
+            let totalPoints = 0;
+            let hasProducts = false;
+            
+            // Add selected products to list
+            Object.entries(selectedProducts).forEach(([category, product]) => {
+                if (product) {
+                    hasProducts = true;
+                    totalPoints += product.points;
+                    
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'flex justify-between items-center bg-slate-700/30 rounded-lg p-2 card-3d';
+                    productDiv.innerHTML = `
+                        <div>
+                            <span class="font-bold text-sm futuristic-text">${product.name}</span>
+                            <span class="text-xs text-slate-400 ml-2">(${category})</span>
+                        </div>
+                        <div class="text-green-400 font-bold">${product.points} pts</div>
+                    `;
+                    
+                    listDiv.appendChild(productDiv);
+                }
+            });
+            
+            // Update total points
+            totalPointsSpan.textContent = `${totalPoints} pts`;
+            
+            // Show/hide summary and sale form
+            if (hasProducts) {
+                summaryDiv.classList.remove('hidden');
+                document.getElementById('saleForm').classList.remove('hidden');
+            } else {
+                summaryDiv.classList.add('hidden');
+                document.getElementById('saleForm').classList.add('hidden');
+            }
+        }
+
+        function resetSaleForm() {
+            // Clear selected products
+            selectedProducts = {};
+            
+            // Reset category displays
+            ['lentes', 'materiais', 'tratamentos', 'sensity'].forEach(category => {
+                const selectedElement = document.getElementById(`${category}Selected`);
+                const categoryBtn = document.getElementById(`${category}Btn`);
+                
+                selectedElement.textContent = 'Clique para selecionar';
+                categoryBtn.classList.remove('category-selected');
+            });
+            
+            // Clear form fields
+            document.getElementById('dashboardQuantity').value = '';
+            document.getElementById('dashboardValue').value = '';
+            document.getElementById('dashboardDescription').value = '';
+            document.getElementById('frameValue').value = '';
+            document.getElementById('lensValue').value = '';
+            document.getElementById('discountValue').value = '';
+            document.getElementById('discountPercentageField').value = '';
+            
+            // Reset calculation display
+            document.getElementById('calculationDisplay').textContent = 'R$ 0,00 + R$ 0,00 - R$ 0,00 = R$ 0,00';
+            
+            // Hide summary and form
+            document.getElementById('selectedProductsSummary').classList.add('hidden');
+            document.getElementById('saleForm').classList.add('hidden');
+        }
+
+        function calculateTotal() {
+            const frameValue = parseFloat(document.getElementById('frameValue').value) || 0;
+            const lensValue = parseFloat(document.getElementById('lensValue').value) || 0;
+            const discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
+            
+            const subtotal = frameValue + lensValue;
+            const total = subtotal - discountValue;
+            
+            // Calculate and update discount percentage field
+            const discountPercentageField = document.getElementById('discountPercentageField');
+            if (discountValue > 0 && subtotal > 0) {
+                const discountPercent = ((discountValue / subtotal) * 100).toFixed(2);
+                discountPercentageField.value = discountPercent;
+            } else {
+                discountPercentageField.value = '0.00';
+            }
+            
+            // Update calculation display
+            document.getElementById('calculationDisplay').textContent = 
+                `R$ ${lensValue.toFixed(2).replace('.', ',')} + R$ ${frameValue.toFixed(2).replace('.', ',')} - R$ ${discountValue.toFixed(2).replace('.', ',')} = R$ ${total.toFixed(2).replace('.', ',')}`;
+            
+            // Update total value field
+            document.getElementById('dashboardValue').value = total.toFixed(2);
+        }
+
+        function submitSale() {
+            const sellerId = document.getElementById('dashboardSellerSelect').value;
+            const orderId = document.getElementById('dashboardQuantity').value;
+            const value = parseFloat(document.getElementById('dashboardValue').value);
+            const description = document.getElementById('dashboardDescription').value;
+            
+            // Validation
+            if (!sellerId) {
+                showToast('Por favor, selecione um vendedor!');
+                return;
+            }
+            
+            if (!orderId || orderId <= 0) {
+                showToast('Por favor, digite um ID de pedido válido!');
+                return;
+            }
+            
+            // Check for duplicate order ID across all sellers
+            const duplicateFound = sellers.some(seller => {
+                return seller.sales && seller.sales.some(sale => sale.orderId == orderId);
+            });
+            
+            if (duplicateFound) {
+                showToast(`❌ ID do pedido ${orderId} já existe! Use um ID único.`);
+                return;
+            }
+            
+            if (!value || value <= 0) {
+                showToast('Por favor, digite um valor válido!');
+                return;
+            }
+            
+            if (Object.keys(selectedProducts).length === 0) {
+                showToast('Por favor, selecione pelo menos um produto!');
+                return;
+            }
+            
+            // Find seller
+            const seller = sellers.find(s => s.id === sellerId);
+            if (!seller) {
+                showToast('Vendedor não encontrado!');
+                return;
+            }
+            
+            // Calculate total points
+            let totalPoints = 0;
+            Object.values(selectedProducts).forEach(product => {
+                if (product) {
+                    totalPoints += product.points;
+                }
+            });
+            
+            // Add bonus for discount
+            const discountPercentage = parseFloat(document.getElementById('discountPercentageField').value) || 0;
+            let discountBonus = 0;
+            if (discountPercentage === 0) {
+                discountBonus = 50; // No discount bonus
+                totalPoints += discountBonus;
+            } else if (discountPercentage <= 5) {
+                discountBonus = 20; // Low discount bonus
+                totalPoints += discountBonus;
+            }
+            
+            // Get detailed values
+            const frameValue = parseFloat(document.getElementById('frameValue').value) || 0;
+            const lensValue = parseFloat(document.getElementById('lensValue').value) || 0;
+            const discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
+            
+            // Create sale record
+            const sale = {
+                id: Date.now(),
+                orderId: parseInt(orderId),
+                sellerId: sellerId,
+                products: { ...selectedProducts },
+                totalPoints: totalPoints,
+                value: value,
+                frameValue: frameValue,
+                lensValue: lensValue,
+                discountValue: discountValue,
+                discountPercentage: discountPercentage,
+                discountBonus: discountBonus,
+                description: description,
+                date: new Date().toISOString()
+            };
+            
+            // Add to seller's sales
+            if (!seller.sales) seller.sales = [];
+            seller.sales.push(sale);
+            
+            // Update seller's totals
+            seller.totalPoints = (seller.totalPoints || 0) + totalPoints;
+            seller.totalSales = (seller.totalSales || 0) + 1;
+            seller.totalValue = (seller.totalValue || 0) + value;
+            
+            // Update category points
+            Object.entries(selectedProducts).forEach(([category, product]) => {
+                if (product) {
+                    const categoryKey = `${category}Points`;
+                    seller[categoryKey] = (seller[categoryKey] || 0) + product.points;
+                }
+            });
+            
+            // Save data
+            saveData();
+            
+            // Update displays
+            updateStats();
+            updateSellerSelect();
+            
+            // Check for ranking changes and generate messages
+            setTimeout(() => {
+                checkRankingChanges();
+                checkPerformanceAlerts();
+            }, 100);
+            
+            // Reset form
+            resetSaleForm();
+            
+            // Show success message
+            let successMessage = `Venda registrada com sucesso! ${totalPoints} pontos adicionados para ${seller.name}!`;
+            if (discountBonus === 50) {
+                successMessage += ` 🎉 Bônus de ${discountBonus} pts por venda sem desconto!`;
+            } else if (discountBonus === 20) {
+                successMessage += ` 🎉 Bônus de ${discountBonus} pts por desconto baixo!`;
+            }
+            showToast(successMessage);
+        }
+
+        function handleDateFilterChange() {
+            const filterValue = document.getElementById('dateFilter').value;
+            const customRange = document.getElementById('customDateRange');
+            
+            if (filterValue === 'custom') {
+                customRange.classList.remove('hidden');
+            } else {
+                customRange.classList.add('hidden');
+                applyDateFilter(filterValue);
+            }
+        }
+
+        function applyCustomDateFilter() {
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
+            
+            if (!startDate || !endDate) {
+                showToast('Por favor, selecione ambas as datas!');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('A data inicial deve ser anterior à data final!');
+                return;
+            }
+            
+            applyDateFilter('custom', startDate, endDate);
+        }
+
+        function applyDateFilter(filterType, customStart = null, customEnd = null) {
+            const now = new Date();
+            let startDate, endDate;
+            let filterText = '';
+            
+            switch (filterType) {
+                case 'today':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+                    filterText = 'Vendas de hoje';
+                    break;
+                    
+                case 'yesterday':
+                    const yesterday = new Date(now);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    startDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+                    endDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59);
+                    filterText = 'Vendas de ontem';
+                    break;
+                    
+                case 'week':
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setDate(now.getDate() - now.getDay());
+                    startDate = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate());
+                    endDate = now;
+                    filterText = 'Vendas desta semana';
+                    break;
+                    
+                case 'lastWeek':
+                    const lastWeekStart = new Date(now);
+                    lastWeekStart.setDate(now.getDate() - now.getDay() - 7);
+                    const lastWeekEnd = new Date(lastWeekStart);
+                    lastWeekEnd.setDate(lastWeekStart.getDate() + 6);
+                    startDate = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate());
+                    endDate = new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate(), 23, 59, 59);
+                    filterText = 'Vendas da semana passada';
+                    break;
+                    
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    endDate = now;
+                    filterText = 'Vendas deste mês';
+                    break;
+                    
+                case 'lastMonth':
+                    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+                    startDate = lastMonth;
+                    endDate = new Date(lastMonthEnd.getFullYear(), lastMonthEnd.getMonth(), lastMonthEnd.getDate(), 23, 59, 59);
+                    filterText = 'Vendas do mês passado';
+                    break;
+                    
+                case 'custom':
+                    startDate = new Date(customStart);
+                    endDate = new Date(customEnd + 'T23:59:59');
+                    filterText = `Vendas de ${startDate.toLocaleDateString('pt-BR')} até ${endDate.toLocaleDateString('pt-BR')}`;
+                    break;
+                    
+                default:
+                    startDate = null;
+                    endDate = null;
+                    filterText = '';
+            }
+            
+            updateRankingsWithFilter(startDate, endDate, filterText);
+        }
+
+        function updateRankingsWithFilter(startDate, endDate, filterText) {
+            const filterSummary = document.getElementById('filterSummary');
+            const filterSummaryText = document.getElementById('filterSummaryText');
+            
+            if (filterText) {
+                filterSummary.classList.remove('hidden');
+                filterSummaryText.textContent = `📊 Exibindo: ${filterText}`;
+            } else {
+                filterSummary.classList.add('hidden');
+            }
+            
+            // Calculate filtered rankings
+            const filteredSellers = sellers.map(seller => {
+                const filteredSeller = { ...seller };
+                
+                if (startDate && endDate && seller.sales) {
+                    // Filter sales by date range
+                    const filteredSales = seller.sales.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= startDate && saleDate <= endDate;
+                    });
+                    
+                    // Recalculate totals for filtered period
+                    filteredSeller.totalPoints = filteredSales.reduce((sum, sale) => sum + (sale.totalPoints || 0), 0);
+                    filteredSeller.totalSales = filteredSales.length;
+                    filteredSeller.totalValue = filteredSales.reduce((sum, sale) => sum + (sale.value || 0), 0);
+                    
+                    // Recalculate category points
+                    filteredSeller.lentesPoints = 0;
+                    filteredSeller.materiaisPoints = 0;
+                    filteredSeller.tratamentosPoints = 0;
+                    filteredSeller.sensityPoints = 0;
+                    
+                    filteredSales.forEach(sale => {
+                        Object.entries(sale.products || {}).forEach(([category, product]) => {
+                            if (product && product.points) {
+                                const categoryKey = `${category}Points`;
+                                filteredSeller[categoryKey] = (filteredSeller[categoryKey] || 0) + product.points;
+                            }
+                        });
+                    });
+                }
+                
+                return filteredSeller;
+            });
+            
+            displayFilteredRanking(filteredSellers);
+        }
+
+        function displayFilteredRanking(filteredSellers) {
+            const rankingDiv = document.getElementById('overallRanking');
+            
+            if (filteredSellers.length === 0) {
+                rankingDiv.innerHTML = '<div class="text-center text-slate-400 py-8 futuristic-text">Adicione vendedores para ver o ranking</div>';
+                return;
+            }
+            
+            // Sort sellers by total points (filtered)
+            const sortedSellers = [...filteredSellers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+            
+            rankingDiv.innerHTML = '';
+            
+            sortedSellers.forEach((seller, index) => {
+                const position = index + 1;
+                let rankClass = '';
+                
+                if (position === 1) rankClass = 'rank-1';
+                else if (position === 2) rankClass = 'rank-2';
+                else if (position === 3) rankClass = 'rank-3';
+                
+                const rankDiv = document.createElement('div');
+                rankDiv.className = `${rankClass} flowing-border rounded-lg p-4 transition-all card-3d gamer-glow`;
+                
+                // Calculate averages
+                const avgPointsPerSale = seller.totalSales > 0 ? Math.round((seller.totalPoints || 0) / seller.totalSales) : 0;
+                const avgValuePerSale = seller.totalSales > 0 ? Math.round((seller.totalValue || 0) / seller.totalSales) : 0;
+                const joinDate = seller.joinDate ? new Date(seller.joinDate).toLocaleDateString('pt-BR') : 'N/A';
+                
+                rankDiv.innerHTML = `
+                    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        <!-- Seller Info -->
+                        <div class="flex items-center gap-4">
+                            <div class="text-2xl font-black futuristic-text text-white">#${position}</div>
+                            <div class="relative">
+                                <div class="w-12 h-12 morphing-gradient rounded-full flex items-center justify-center text-white font-bold text-lg cursor-pointer hover:scale-110 transition-transform" onclick="showSellerProfile('${seller.id}')" style="${seller.photo ? `background-image: url(${seller.photo}); background-size: cover; background-position: center;` : ''}">
+                                    ${seller.photo ? '' : seller.name.charAt(0).toUpperCase()}
+                                </div>
+                                ${position === 1 ? '<div class="absolute -top-2 -right-1 text-yellow-400 text-xl">👑</div>' : ''}
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-lg futuristic-text text-white">${seller.name}</div>
+                                <div class="text-sm text-white">Membro desde: ${joinDate}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total Points Only -->
+                        <div class="text-center">
+                            <div class="bg-slate-600/30 rounded-lg p-4 inline-block">
+                                <div class="text-2xl font-black text-white">${(seller.totalPoints || 0).toLocaleString('pt-BR')}</div>
+                                <div class="text-sm text-white futuristic-text">PONTOS TOTAIS</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                rankingDiv.appendChild(rankDiv);
+            });
+        }
+
+        function handleAddSeller(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('sellerName').value.trim();
+            
+            if (!name) {
+                showToast('Por favor, digite o nome do vendedor!');
+                return;
+            }
+            
+            // Check if seller already exists
+            if (sellers.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+                showToast('Já existe um vendedor com este nome!');
+                return;
+            }
+            
+            // Create new seller
+            const seller = {
+                id: Date.now().toString(),
+                name: name,
+                totalPoints: 0,
+                totalSales: 0,
+                totalValue: 0,
+                lentesPoints: 0,
+                materiaisPoints: 0,
+                tratamentosPoints: 0,
+                sensityPoints: 0,
+                sales: [],
+                joinDate: new Date().toISOString()
+            };
+            
+            sellers.push(seller);
+            saveData();
+            
+            // Update displays
+            updateStats();
+            updateSellerSelect();
+            updateRankingsPage();
+            
+            // Clear form and close modal
+            document.getElementById('sellerName').value = '';
+            hideModal('addSellerModal');
+            
+            showToast(`Vendedor ${name} cadastrado com sucesso!`);
+        }
+
+
+
+        function updateStats() {
+            // Calculate totals
+            const totalSellers = sellers.length;
+            const totalPoints = sellers.reduce((sum, seller) => sum + (seller.totalPoints || 0), 0);
+            const totalSales = sellers.reduce((sum, seller) => sum + (seller.totalSales || 0), 0);
+            const totalRevenue = sellers.reduce((sum, seller) => sum + (seller.totalValue || 0), 0);
+            
+            // Update displays
+            document.getElementById('totalSellers').textContent = totalSellers.toLocaleString('pt-BR');
+            document.getElementById('totalPoints').textContent = totalPoints.toLocaleString('pt-BR');
+            document.getElementById('totalSales').textContent = totalSales.toLocaleString('pt-BR');
+            document.getElementById('totalRevenue').textContent = `R$ ${totalRevenue.toLocaleString('pt-BR')}`;
+        }
+
+        function updateSellerSelect() {
+            const select = document.getElementById('dashboardSellerSelect');
+            
+            // Clear existing options except first
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Add sellers
+            sellers.forEach(seller => {
+                const option = document.createElement('option');
+                option.value = seller.id;
+                option.textContent = seller.name;
+                select.appendChild(option);
+            });
+        }
+
+        function updateRankingsPage() {
+            // Reset filter to show all data when switching to ranking tab
+            document.getElementById('dateFilter').value = 'all';
+            document.getElementById('customDateRange').classList.add('hidden');
+            
+            const rankingDiv = document.getElementById('overallRanking');
+            
+            if (sellers.length === 0) {
+                rankingDiv.innerHTML = '<div class="text-center text-slate-400 py-8 futuristic-text">Adicione vendedores para ver o ranking</div>';
+                return;
+            }
+            
+            // Sort sellers by total points
+            const sortedSellers = [...sellers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+            
+            rankingDiv.innerHTML = '';
+            
+            sortedSellers.forEach((seller, index) => {
+                const position = index + 1;
+                let rankClass = '';
+                
+                if (position === 1) rankClass = 'rank-1';
+                else if (position === 2) rankClass = 'rank-2';
+                else if (position === 3) rankClass = 'rank-3';
+                
+                const rankDiv = document.createElement('div');
+                rankDiv.className = `${rankClass} flowing-border rounded-lg p-4 transition-all card-3d gamer-glow`;
+                
+                // Calculate averages
+                const avgPointsPerSale = seller.totalSales > 0 ? Math.round((seller.totalPoints || 0) / seller.totalSales) : 0;
+                const avgValuePerSale = seller.totalSales > 0 ? Math.round((seller.totalValue || 0) / seller.totalSales) : 0;
+                const joinDate = seller.joinDate ? new Date(seller.joinDate).toLocaleDateString('pt-BR') : 'N/A';
+                
+                rankDiv.innerHTML = `
+                    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        <!-- Seller Info -->
+                        <div class="flex items-center gap-4">
+                            <div class="text-2xl font-black futuristic-text text-white">#${position}</div>
+                            <div class="relative">
+                                <div class="w-12 h-12 morphing-gradient rounded-full flex items-center justify-center text-white font-bold text-lg cursor-pointer hover:scale-110 transition-transform" onclick="showSellerProfile('${seller.id}')" style="${seller.photo ? `background-image: url(${seller.photo}); background-size: cover; background-position: center;` : ''}">
+                                    ${seller.photo ? '' : seller.name.charAt(0).toUpperCase()}
+                                </div>
+                                ${position === 1 ? '<div class="absolute -top-2 -right-1 text-yellow-400 text-xl">👑</div>' : ''}
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-lg futuristic-text text-white">${seller.name}</div>
+                                <div class="text-sm text-white">Membro desde: ${joinDate}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total Points Only -->
+                        <div class="text-center">
+                            <div class="bg-slate-600/30 rounded-lg p-4 inline-block">
+                                <div class="text-2xl font-black text-white">${(seller.totalPoints || 0).toLocaleString('pt-BR')}</div>
+                                <div class="text-sm text-white futuristic-text">PONTOS TOTAIS</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                rankingDiv.appendChild(rankDiv);
+            });
+        }
+
+        function updatePerformancePage() {
+            if (sellers.length === 0) return;
+            
+            // Calculate top performers
+            const topOverall = sellers.reduce((max, seller) => 
+                (seller.totalPoints || 0) > (max.totalPoints || 0) ? seller : max, sellers[0]);
+            
+            const topLenses = sellers.reduce((max, seller) => 
+                (seller.lentesPoints || 0) > (max.lentesPoints || 0) ? seller : max, sellers[0]);
+            
+            const topMaterials = sellers.reduce((max, seller) => 
+                (seller.materiaisPoints || 0) > (max.materiaisPoints || 0) ? seller : max, sellers[0]);
+            
+            const topSensity = sellers.reduce((max, seller) => 
+                (seller.sensityPoints || 0) > (max.sensityPoints || 0) ? seller : max, sellers[0]);
+            
+            const topTreatments = sellers.reduce((max, seller) => 
+                (seller.tratamentosPoints || 0) > (max.tratamentosPoints || 0) ? seller : max, sellers[0]);
+            
+            // Update top performers
+            document.getElementById('topOverall').textContent = topOverall.name;
+            document.getElementById('topOverallPoints').textContent = `${(topOverall.totalPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            document.getElementById('topLenses').textContent = topLenses.name;
+            document.getElementById('topLensesPoints').textContent = `${(topLenses.lentesPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            document.getElementById('topMaterials').textContent = topMaterials.name;
+            document.getElementById('topMaterialsPoints').textContent = `${(topMaterials.materiaisPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            document.getElementById('topSensity').textContent = topSensity.name;
+            document.getElementById('topSensityPoints').textContent = `${(topSensity.sensityPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            document.getElementById('topTreatments').textContent = topTreatments.name;
+            document.getElementById('topTreatmentsPoints').textContent = `${(topTreatments.tratamentosPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            // Calculate statistics
+            const avgPoints = Math.round(sellers.reduce((sum, seller) => sum + (seller.totalPoints || 0), 0) / sellers.length);
+            const avgSales = Math.round(sellers.reduce((sum, seller) => sum + (seller.totalSales || 0), 0) / sellers.length);
+            
+            document.getElementById('avgPoints').textContent = avgPoints.toLocaleString('pt-BR');
+            document.getElementById('avgSales').textContent = avgSales.toLocaleString('pt-BR');
+            
+            // Calculate detailed statistics
+            
+            // 1. Maior conversor em valores (total de vendas em R$)
+            const topValueConverter = sellers.reduce((max, seller) => 
+                (seller.totalValue || 0) > (max.totalValue || 0) ? seller : max, sellers[0]);
+            
+            document.getElementById('topValueConverter').textContent = topValueConverter.name;
+            document.getElementById('topValueAmount').textContent = `R$ ${(topValueConverter.totalValue || 0).toLocaleString('pt-BR')}`;
+            
+            // 2. Maior média de valores por venda
+            const topAvgValueSeller = sellers.reduce((max, seller) => {
+                const avgValue = (seller.totalSales || 0) > 0 ? (seller.totalValue || 0) / seller.totalSales : 0;
+                const maxAvgValue = (max.totalSales || 0) > 0 ? (max.totalValue || 0) / max.totalSales : 0;
+                return avgValue > maxAvgValue ? seller : max;
+            }, sellers[0]);
+            
+            const avgValueAmount = (topAvgValueSeller.totalSales || 0) > 0 ? 
+                Math.round((topAvgValueSeller.totalValue || 0) / topAvgValueSeller.totalSales) : 0;
+            
+            document.getElementById('topAvgValue').textContent = topAvgValueSeller.name;
+            document.getElementById('topAvgValueAmount').textContent = `R$ ${avgValueAmount.toLocaleString('pt-BR')}/venda`;
+            
+            // 3-7. Premium specialists (simplified for now)
+            document.getElementById('topPremiumLenses').textContent = topLenses.name;
+            document.getElementById('topPremiumLensesPoints').textContent = `${(topLenses.lentesPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            document.getElementById('topPremiumMaterials').textContent = topMaterials.name;
+            document.getElementById('topPremiumMaterialsPoints').textContent = `${(topMaterials.materiaisPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            document.getElementById('topPremiumTreatments').textContent = topTreatments.name;
+            document.getElementById('topPremiumTreatmentsPoints').textContent = `${(topTreatments.tratamentosPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            document.getElementById('topPremiumSensity').textContent = topSensity.name;
+            document.getElementById('topPremiumSensityPoints').textContent = `${(topSensity.sensityPoints || 0).toLocaleString('pt-BR')} pts`;
+            
+            // Find most sold product
+            const productCounts = {};
+            sellers.forEach(seller => {
+                if (seller.sales) {
+                    seller.sales.forEach(sale => {
+                        Object.values(sale.products).forEach(product => {
+                            if (product && product.name) {
+                                productCounts[product.name] = (productCounts[product.name] || 0) + 1;
+                            }
+                        });
+                    });
+                }
+            });
+            
+            const topProduct = Object.entries(productCounts).reduce((max, [product, count]) => 
+                count > (max[1] || 0) ? [product, count] : max, ['Nenhum', 0]);
+            
+            document.getElementById('topProduct').textContent = topProduct[0];
+            document.getElementById('topProductCount').textContent = `${topProduct[1].toLocaleString('pt-BR')} vendas`;
+            
+            // Update discount ranking
+            updateDiscountRanking();
+        }
+
+        function updateDiscountRanking() {
+            const discountRankingDiv = document.getElementById('discountRanking');
+            
+            if (sellers.length === 0) {
+                discountRankingDiv.innerHTML = '<div class="text-center text-slate-400 py-4">Nenhum vendedor cadastrado</div>';
+                return;
+            }
+            
+            // Calculate average discount for each seller
+            const sellersWithDiscount = sellers.map(seller => {
+                let totalDiscount = 0;
+                let salesWithDiscount = 0;
+                let avgDiscount = 0;
+                
+                if (seller.sales && seller.sales.length > 0) {
+                    seller.sales.forEach(sale => {
+                        if (sale.discountPercentage !== undefined && sale.discountPercentage !== null) {
+                            totalDiscount += sale.discountPercentage;
+                            salesWithDiscount++;
+                        }
+                    });
+                    
+                    if (salesWithDiscount > 0) {
+                        avgDiscount = totalDiscount / salesWithDiscount;
+                    }
+                }
+                
+                return {
+                    ...seller,
+                    avgDiscount: avgDiscount,
+                    salesWithDiscount: salesWithDiscount,
+                    hasValidData: salesWithDiscount > 0
+                };
+            });
+            
+            // Filter only sellers with valid discount data and sort by lowest average discount
+            const validSellers = sellersWithDiscount.filter(seller => seller.hasValidData);
+            const invalidSellers = sellersWithDiscount.filter(seller => !seller.hasValidData);
+            
+            // Sort valid sellers by lowest discount (best performers first)
+            const sortedValidSellers = validSellers.sort((a, b) => a.avgDiscount - b.avgDiscount);
+            
+            // Combine sorted valid sellers with invalid sellers at the end
+            const finalRanking = [...sortedValidSellers, ...invalidSellers];
+            
+            discountRankingDiv.innerHTML = '';
+            
+            finalRanking.forEach((seller, index) => {
+                const position = index + 1;
+                let rankClass = '';
+                let medalIcon = '';
+                
+                // Only show medals for sellers with valid data
+                if (seller.hasValidData) {
+                    if (position === 1) {
+                        rankClass = 'rank-1';
+                        medalIcon = '🥇';
+                    } else if (position === 2) {
+                        rankClass = 'rank-2';
+                        medalIcon = '🥈';
+                    } else if (position === 3) {
+                        rankClass = 'rank-3';
+                        medalIcon = '🥉';
+                    } else {
+                        rankClass = 'bg-slate-700/50 text-white';
+                    }
+                } else {
+                    rankClass = 'bg-slate-800/50 text-slate-400';
+                }
+                
+                const rankDiv = document.createElement('div');
+                rankDiv.className = `${rankClass} flowing-border rounded-lg p-3 card-3d transition-all`;
+                
+                let discountDisplay = '';
+                let salesInfo = '';
+                let statusColor = '';
+                
+                if (!seller.hasValidData) {
+                    if (seller.totalSales === 0) {
+                        discountDisplay = 'Sem vendas';
+                        salesInfo = 'Nenhuma venda registrada';
+                    } else {
+                        discountDisplay = 'N/A';
+                        salesInfo = `${seller.totalSales} vendas (sem dados de desconto)`;
+                    }
+                    statusColor = 'text-slate-400';
+                } else {
+                    discountDisplay = `${seller.avgDiscount.toFixed(1)}%`;
+                    salesInfo = `${seller.salesWithDiscount} vendas analisadas`;
+                    
+                    // Color based on discount performance
+                    if (seller.avgDiscount === 0) {
+                        statusColor = 'text-green-400'; // Perfect - no discount
+                    } else if (seller.avgDiscount <= 5) {
+                        statusColor = 'text-yellow-400'; // Good - low discount
+                    } else if (seller.avgDiscount <= 10) {
+                        statusColor = 'text-orange-400'; // Moderate discount
+                    } else {
+                        statusColor = 'text-red-400'; // High discount
+                    }
+                }
+                
+                rankDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${medalIcon || `#${position}`}</span>
+                            <div>
+                                <div class="font-bold text-lg futuristic-text">${seller.name.toUpperCase()}</div>
+                                <div class="text-sm opacity-75">${seller.totalSales || 0} vendas</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-xl ${statusColor}">${discountDisplay}</div>
+                            <div class="text-sm opacity-75">
+                                ${seller.hasValidData ? 'Desconto médio' : 'Status'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                discountRankingDiv.appendChild(rankDiv);
+            });
+        }
+
+        function exportRankingToExcel() {
+            if (sellers.length === 0) {
+                showToast('Nenhum vendedor cadastrado para exportar.');
+                return;
+            }
+
+            showToast('Preparando planilha do ranking... Aguarde!');
+
+            try {
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Sort sellers by total points
+                const sortedSellers = [...sellers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+                
+                // RANKING GERAL
+                const rankingData = [
+                    ['RANKING GERAL - TORNEIO DE VENDAS'],
+                    [`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`],
+                    [],
+                    ['Posição', 'Nome', 'Pontos Totais', 'Vendas', 'Faturamento (R$)', 'Lentes (pts)', 'Materiais (pts)', 'Tratamentos (pts)', 'Sensity (pts)', 'Média pts/venda', 'Valor médio/venda', 'Membro desde']
+                ];
+
+                sortedSellers.forEach((seller, index) => {
+                    const position = index + 1;
+                    const avgPointsPerSale = seller.totalSales > 0 ? Math.round((seller.totalPoints || 0) / seller.totalSales) : 0;
+                    const avgValuePerSale = seller.totalSales > 0 ? Math.round((seller.totalValue || 0) / seller.totalSales) : 0;
+                    
+                    rankingData.push([
+                        position,
+                        seller.name,
+                        seller.totalPoints || 0,
+                        seller.totalSales || 0,
+                        seller.totalValue || 0,
+                        seller.lentesPoints || 0,
+                        seller.materiaisPoints || 0,
+                        seller.tratamentosPoints || 0,
+                        seller.sensityPoints || 0,
+                        avgPointsPerSale,
+                        avgValuePerSale,
+                        seller.joinDate ? new Date(seller.joinDate).toLocaleDateString('pt-BR') : 'N/A'
+                    ]);
+                });
+
+                const wsRanking = XLSX.utils.aoa_to_sheet(rankingData);
+                XLSX.utils.book_append_sheet(wb, wsRanking, 'Ranking Geral');
+
+                // Generate and download the file
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                XLSX.writeFile(wb, `ranking-geral-torneio-vendas-${timestamp}.xlsx`);
+                
+                showToast('✅ Planilha do ranking baixada com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar Excel:', error);
+                showToast('❌ Erro ao gerar planilha Excel. Tente novamente.');
+            }
+        }
+
+        function exportToExcel() {
+            if (sellers.length === 0) {
+                showToast('Nenhum vendedor cadastrado para exportar.');
+                return;
+            }
+
+            showToast('Preparando planilha Excel... Aguarde!');
+
+            try {
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                
+                // 1. RANKING GERAL
+                const sortedSellers = [...sellers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+                const rankingData = [
+                    ['RANKING GERAL - TORNEIO DE VENDAS'],
+                    [`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`],
+                    [],
+                    ['Posição', 'Nome', 'Pontos Totais', 'Vendas', 'Faturamento (R$)', 'Lentes (pts)', 'Materiais (pts)', 'Tratamentos (pts)', 'Sensity (pts)', 'Média pts/venda', 'Valor médio/venda', 'Membro desde']
+                ];
+
+                sortedSellers.forEach((seller, index) => {
+                    const position = index + 1;
+                    const avgPointsPerSale = seller.totalSales > 0 ? Math.round((seller.totalPoints || 0) / seller.totalSales) : 0;
+                    const avgValuePerSale = seller.totalSales > 0 ? Math.round((seller.totalValue || 0) / seller.totalSales) : 0;
+                    
+                    rankingData.push([
+                        position,
+                        seller.name,
+                        seller.totalPoints || 0,
+                        seller.totalSales || 0,
+                        seller.totalValue || 0,
+                        seller.lentesPoints || 0,
+                        seller.materiaisPoints || 0,
+                        seller.tratamentosPoints || 0,
+                        seller.sensityPoints || 0,
+                        avgPointsPerSale,
+                        avgValuePerSale,
+                        seller.joinDate ? new Date(seller.joinDate).toLocaleDateString('pt-BR') : 'N/A'
+                    ]);
+                });
+
+                const wsRanking = XLSX.utils.aoa_to_sheet(rankingData);
+                XLSX.utils.book_append_sheet(wb, wsRanking, 'Ranking Geral');
+
+                // 2. VENDAS DETALHADAS
+                const salesData = [
+                    ['HISTÓRICO COMPLETO DE VENDAS'],
+                    [`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`],
+                    [],
+                    ['Data', 'Vendedor', 'ID Pedido', 'Lente', 'Material', 'Tratamento', 'Sensity', 'Pontos Totais', 'Valor (R$)', 'Observações']
+                ];
+
+                sellers.forEach(seller => {
+                    if (seller.sales && seller.sales.length > 0) {
+                        seller.sales.forEach(sale => {
+                            const saleDate = new Date(sale.date).toLocaleDateString('pt-BR');
+                            const lente = sale.products.lentes ? sale.products.lentes.name : '-';
+                            const material = sale.products.materiais ? sale.products.materiais.name : '-';
+                            const tratamento = sale.products.tratamentos ? sale.products.tratamentos.name : '-';
+                            const sensity = sale.products.sensity ? sale.products.sensity.name : '-';
+                            
+                            salesData.push([
+                                saleDate,
+                                seller.name,
+                                sale.orderId,
+                                lente,
+                                material,
+                                tratamento,
+                                sensity,
+                                sale.totalPoints,
+                                sale.value,
+                                sale.description || '-'
+                            ]);
+                        });
+                    }
+                });
+
+                const wsSales = XLSX.utils.aoa_to_sheet(salesData);
+                XLSX.utils.book_append_sheet(wb, wsSales, 'Vendas Detalhadas');
+
+                // Generate and download the file
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                const fileName = `relatorio-completo-torneio-vendas-${timestamp}.xlsx`;
+                
+                XLSX.writeFile(wb, fileName);
+                
+                showToast('✅ Planilha Excel baixada com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar Excel:', error);
+                showToast('❌ Erro ao gerar planilha Excel. Tente novamente.');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('successMessage');
+            const messageText = document.getElementById('successMessageText');
+            
+            messageText.textContent = message;
+            toast.classList.remove('hidden', 'translate-x-full');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+
+        // ===== SISTEMA DE MENSAGENS =====
+
+        function generateMessage(type, title, content, priority = 'normal', sellerId = null) {
+            const message = {
+                id: Date.now() + Math.random(),
+                type: type,
+                title: title,
+                content: content,
+                priority: priority,
+                sellerId: sellerId,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            messages.unshift(message);
+            
+            // Keep only last 100 messages
+            if (messages.length > 100) {
+                messages = messages.slice(0, 100);
+            }
+            
+            saveData();
+            updateMessagesBadge();
+            
+            return message;
+        }
+
+        function updateMessagesBadge() {
+            const unreadCount = messages.filter(m => !m.read).length;
+            const badge = document.getElementById('messagesBadge');
+            
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function setMessageFilter(filter) {
+            currentMessageFilter = filter;
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600');
+                btn.classList.add('bg-slate-600');
+            });
+            
+            const activeBtn = document.getElementById(`filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'bg-blue-600');
+                activeBtn.classList.remove('bg-slate-600');
+            }
+            
+            displayMessages();
+        }
+
+        function displayMessages() {
+            const messagesList = document.getElementById('messagesList');
+            let filteredMessages = messages;
+            
+            // Apply filter
+            if (currentMessageFilter !== 'all') {
+                filteredMessages = messages.filter(m => m.type === currentMessageFilter);
+            }
+            
+            if (filteredMessages.length === 0) {
+                messagesList.innerHTML = '<div class="text-center text-slate-400 py-8 futuristic-text">Nenhuma mensagem nesta categoria</div>';
+                return;
+            }
+            
+            messagesList.innerHTML = '';
+            
+            filteredMessages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message-item ${message.read ? 'message-read' : 'message-unread'} rounded-lg p-4 cursor-pointer group`;
+                
+                const priorityIcon = message.priority === 'high' ? '🔴' : message.priority === 'medium' ? '🟡' : '🟢';
+                const typeIcon = getTypeIcon(message.type);
+                const timeAgo = getTimeAgo(new Date(message.timestamp));
+                
+                messageDiv.innerHTML = `
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">${typeIcon}</span>
+                            <span class="text-xs">${priorityIcon}</span>
+                            <h4 class="font-bold text-sm ${message.read ? 'text-slate-300' : 'text-white'} futuristic-text">${message.title}</h4>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-xs text-slate-400">${timeAgo}</div>
+                            <button onclick="deleteMessage('${message.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-full w-6 h-6 flex items-center justify-center text-sm transition-all opacity-0 group-hover:opacity-100" title="Excluir mensagem">
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm ${message.read ? 'text-slate-400' : 'text-slate-200'} mb-2">${message.content}</p>
+                    ${!message.read ? '<div class="text-xs text-blue-400 font-bold futuristic-text">• NOVA MENSAGEM</div>' : ''}
+                `;
+                
+                messageDiv.addEventListener('click', () => markMessageAsRead(message.id));
+                messagesList.appendChild(messageDiv);
+            });
+        }
+
+        function getTypeIcon(type) {
+            const icons = {
+                'ranking': '🏆',
+                'challenges': '🎯',
+                'performance': '📊',
+                'alerts': '⚠️',
+                'achievements': '🏅',
+                'goals': '🎯'
+            };
+            return icons[type] || '💬';
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Agora';
+            if (diffMins < 60) return `${diffMins}min`;
+            if (diffHours < 24) return `${diffHours}h`;
+            if (diffDays < 7) return `${diffDays}d`;
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function markMessageAsRead(messageId) {
+            const message = messages.find(m => m.id === messageId);
+            if (message && !message.read) {
+                message.read = true;
+                saveData();
+                updateMessagesBadge();
+                displayMessages();
+            }
+        }
+
+        function markAllMessagesAsRead() {
+            messages.forEach(message => {
+                message.read = true;
+            });
+            saveData();
+            updateMessagesBadge();
+            displayMessages();
+            showToast('✅ Todas as mensagens foram marcadas como lidas!');
+        }
+
+        function deleteMessage(messageId) {
+            const messageIndex = messages.findIndex(m => m.id == messageId);
+            if (messageIndex === -1) {
+                showToast('❌ Mensagem não encontrada!');
+                return;
+            }
+
+            const message = messages[messageIndex];
+            
+            // Remove message from array
+            messages.splice(messageIndex, 1);
+            
+            // Save data
+            saveData();
+            
+            // Update displays
+            updateMessagesBadge();
+            displayMessages();
+            
+            showToast('✅ Mensagem excluída com sucesso!');
+        }
+
+        function checkRankingChanges() {
+            const currentRanking = [...sellers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+            
+            currentRanking.forEach((seller, index) => {
+                const currentPosition = index + 1;
+                const lastPosition = lastRankingPositions[seller.id];
+                
+                if (lastPosition && lastPosition !== currentPosition) {
+                    if (currentPosition < lastPosition) {
+                        // Subiu no ranking
+                        const positionsGained = lastPosition - currentPosition;
+                        generateMessage(
+                            'ranking',
+                            `🚀 ${seller.name} subiu no ranking!`,
+                            `${seller.name} subiu ${positionsGained} posição${positionsGained > 1 ? 'ões' : ''} no ranking! Agora está em ${currentPosition}º lugar com ${(seller.totalPoints || 0).toLocaleString('pt-BR')} pontos.`,
+                            'medium',
+                            seller.id
+                        );
+                    } else {
+                        // Desceu no ranking
+                        const positionsLost = currentPosition - lastPosition;
+                        generateMessage(
+                            'ranking',
+                            `📉 ${seller.name} desceu no ranking`,
+                            `${seller.name} desceu ${positionsLost} posição${positionsLost > 1 ? 'ões' : ''} no ranking. Agora está em ${currentPosition}º lugar. Precisa de mais vendas para recuperar.`,
+                            'medium',
+                            seller.id
+                        );
+                    }
+                }
+                
+                // Check for new leader
+                if (currentPosition === 1 && lastPosition !== 1) {
+                    generateMessage(
+                        'ranking',
+                        `👑 NOVO LÍDER: ${seller.name}!`,
+                        `${seller.name} assumiu a liderança do torneio com ${(seller.totalPoints || 0).toLocaleString('pt-BR')} pontos! Parabéns pela conquista!`,
+                        'high',
+                        seller.id
+                    );
+                }
+            });
+            
+            // Update last positions
+            currentRanking.forEach((seller, index) => {
+                lastRankingPositions[seller.id] = index + 1;
+            });
+            
+            saveData();
+        }
+
+        function checkPerformanceAlerts() {
+            if (sellers.length === 0) return;
+            
+            // Check for highest average ticket
+            const sellersWithSales = sellers.filter(s => (s.totalSales || 0) > 0);
+            if (sellersWithSales.length === 0) return;
+            
+            const topAvgValue = sellersWithSales.reduce((max, seller) => {
+                const avgValue = (seller.totalValue || 0) / (seller.totalSales || 1);
+                const maxAvgValue = (max.totalValue || 0) / (max.totalSales || 1);
+                return avgValue > maxAvgValue ? seller : max;
+            });
+            
+            const avgValue = Math.round((topAvgValue.totalValue || 0) / (topAvgValue.totalSales || 1));
+            
+            generateMessage(
+                'performance',
+                `💰 Maior ticket médio: ${topAvgValue.name}`,
+                `${topAvgValue.name} está com o maior ticket médio: R$ ${avgValue.toLocaleString('pt-BR')} por venda! Excelente trabalho na conversão de valores.`,
+                'normal',
+                topAvgValue.id
+            );
+            
+            // Check for sellers who need improvement (bottom 20%)
+            const sortedBySales = [...sellers].sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0));
+            const bottomSellers = sortedBySales.slice(-Math.ceil(sellers.length * 0.2));
+            
+            bottomSellers.forEach(seller => {
+                if ((seller.totalSales || 0) > 0) {
+                    const avgSeller = sortedBySales[Math.floor(sortedBySales.length / 2)];
+                    const avgSales = avgSeller.totalSales || 0;
+                    const gap = avgSales - (seller.totalSales || 0);
+                    
+                    if (gap > 5) {
+                        generateMessage(
+                            'alerts',
+                            `📈 ${seller.name} precisa acelerar!`,
+                            `${seller.name} está ${gap} vendas abaixo da média. Que tal focar em produtos de maior pontuação para recuperar no ranking?`,
+                            'medium',
+                            seller.id
+                        );
+                    }
+                }
+            });
+        }
+
+        function generateDailyInsights() {
+            if (sellers.length === 0) return;
+            
+            const today = new Date();
+            const todayStr = today.toDateString();
+            
+            // Check if we already generated insights today
+            const lastInsight = messages.find(m => 
+                m.type === 'performance' && 
+                new Date(m.timestamp).toDateString() === todayStr &&
+                m.title.includes('Insights Diários')
+            );
+            
+            if (lastInsight) return;
+            
+            // Generate daily insights
+            const totalSales = sellers.reduce((sum, s) => sum + (s.totalSales || 0), 0);
+            const totalPoints = sellers.reduce((sum, s) => sum + (s.totalPoints || 0), 0);
+            const activeSellers = sellers.filter(s => (s.totalSales || 0) > 0).length;
+            
+            generateMessage(
+                'performance',
+                '📊 Insights Diários do Torneio',
+                `Resumo atual: ${activeSellers} vendedores ativos, ${totalSales.toLocaleString('pt-BR')} vendas realizadas, ${totalPoints.toLocaleString('pt-BR')} pontos acumulados. Continue o excelente trabalho!`,
+                'normal'
+            );
+        }
+
+        function generateInitialMessages() {
+            // Generate welcome message if no messages exist
+            if (messages.length === 0) {
+                generateMessage(
+                    'performance',
+                    '🎉 Bem-vindo ao Sistema de Mensagens!',
+                    'Aqui você receberá notificações importantes sobre mudanças no ranking, desafios próximos de serem completados, alertas de performance e muito mais. Mantenha-se sempre informado!',
+                    'normal'
+                );
+            }
+            
+            // Generate insights and alerts
+            generateDailyInsights();
+            checkPerformanceAlerts();
+        }
+
+        // ===== SALE DELETION FUNCTIONS =====
+
+        let pendingDeletion = null;
+        let pendingSellerDeletion = null;
+
+        function confirmDeleteSale(sellerId, saleId) {
+            const seller = sellers.find(s => s.id === sellerId);
+            if (!seller || !seller.sales) {
+                showToast('Vendedor ou venda não encontrada!');
+                return;
+            }
+
+            const sale = seller.sales.find(s => s.id == saleId);
+            if (!sale) {
+                showToast('Venda não encontrada!');
+                return;
+            }
+
+            // Store pending deletion info
+            pendingDeletion = { sellerId, saleId };
+
+            // Populate sale info in modal
+            const saleDate = new Date(sale.date).toLocaleDateString('pt-BR');
+            const products = Object.values(sale.products || {}).filter(p => p).map(p => p.name).join(', ');
+            
+            document.getElementById('deleteSaleInfo').innerHTML = `
+                <div class="space-y-2">
+                    <div><strong>Vendedor:</strong> ${seller.name}</div>
+                    <div><strong>Pedido:</strong> #${sale.orderId}</div>
+                    <div><strong>Data:</strong> ${saleDate}</div>
+                    <div><strong>Produtos:</strong> ${products || 'Não especificados'}</div>
+                    <div><strong>Pontos:</strong> ${sale.totalPoints} pts</div>
+                    <div><strong>Valor:</strong> R$ ${(sale.value || 0).toLocaleString('pt-BR')}</div>
+                    ${sale.description ? `<div><strong>Observações:</strong> ${sale.description}</div>` : ''}
+                </div>
+            `;
+
+            // Show confirmation modal
+            showModal('deleteSaleModal');
+        }
+
+        function executeSaleDeletion() {
+            if (!pendingDeletion) {
+                showToast('Nenhuma venda selecionada para exclusão!');
+                return;
+            }
+
+            const { sellerId, saleId } = pendingDeletion;
+            const seller = sellers.find(s => s.id === sellerId);
+            
+            if (!seller || !seller.sales) {
+                showToast('Vendedor não encontrado!');
+                hideModal('deleteSaleModal');
+                return;
+            }
+
+            const saleIndex = seller.sales.findIndex(s => s.id == saleId);
+            if (saleIndex === -1) {
+                showToast('Venda não encontrada!');
+                hideModal('deleteSaleModal');
+                return;
+            }
+
+            const sale = seller.sales[saleIndex];
+
+            // Remove points from seller totals
+            seller.totalPoints = Math.max(0, (seller.totalPoints || 0) - (sale.totalPoints || 0));
+            seller.totalSales = Math.max(0, (seller.totalSales || 0) - 1);
+            seller.totalValue = Math.max(0, (seller.totalValue || 0) - (sale.value || 0));
+
+            // Remove category points
+            Object.entries(sale.products || {}).forEach(([category, product]) => {
+                if (product && product.points) {
+                    const categoryKey = `${category}Points`;
+                    seller[categoryKey] = Math.max(0, (seller[categoryKey] || 0) - product.points);
+                }
+            });
+
+            // Remove sale from array
+            seller.sales.splice(saleIndex, 1);
+
+            // Save data
+            saveData();
+
+            // Update displays
+            updateStats();
+            updateRankingsPage();
+            updatePerformancePage();
+            
+            // If seller profile is open, update it
+            if (window.currentProfileSeller && window.currentProfileSeller.id === sellerId) {
+                window.currentProfileSeller = seller;
+                updateSellerChallengeProgress(seller);
+                updateSellerRecentSales(seller);
+                
+                // Update profile statistics
+                const avgPoints = seller.totalSales > 0 ? Math.round((seller.totalPoints || 0) / seller.totalSales) : 0;
+                const avgValue = seller.totalSales > 0 ? Math.round((seller.totalValue || 0) / seller.totalSales) : 0;
+                
+                document.getElementById('sellerAvgPoints').textContent = `${avgPoints} pts`;
+                document.getElementById('sellerAvgValue').textContent = `R$ ${avgValue.toLocaleString('pt-BR')}`;
+                
+                // Update category points
+                document.getElementById('sellerLentesPoints').textContent = `${(seller.lentesPoints || 0).toLocaleString('pt-BR')} pts`;
+                document.getElementById('sellerMateriaisPoints').textContent = `${(seller.materiaisPoints || 0).toLocaleString('pt-BR')} pts`;
+                document.getElementById('sellerTratamentosPoints').textContent = `${(seller.tratamentosPoints || 0).toLocaleString('pt-BR')} pts`;
+                document.getElementById('sellerSensityPoints').textContent = `${(seller.sensityPoints || 0).toLocaleString('pt-BR')} pts`;
+                
+                // Recalculate average discount
+                let avgDiscount = 0;
+                if (seller.sales && seller.sales.length > 0) {
+                    const salesWithDiscount = seller.sales.filter(s => s.discountPercentage !== undefined);
+                    if (salesWithDiscount.length > 0) {
+                        const totalDiscount = salesWithDiscount.reduce((sum, s) => sum + (s.discountPercentage || 0), 0);
+                        avgDiscount = (totalDiscount / salesWithDiscount.length).toFixed(1);
+                    }
+                }
+                document.getElementById('sellerAvgDiscount').textContent = `${avgDiscount}%`;
+                
+                // Update specialist products
+                updateSellerSpecialistProducts(seller);
+            }
+
+            // Hide modal and clear pending deletion
+            hideModal('deleteSaleModal');
+            pendingDeletion = null;
+
+            showToast(`✅ Venda #${sale.orderId} excluída com sucesso!`);
+
+            // Generate message about the deletion
+            generateMessage(
+                'alerts',
+                `🗑️ Venda excluída - ${seller.name}`,
+                `A venda #${sale.orderId} de ${seller.name} foi excluída pelo administrador. ${sale.totalPoints} pontos foram removidos.`,
+                'medium',
+                seller.id
+            );
+        }
+
+        // ===== SELLER DELETION FUNCTIONS =====
+
+        function confirmDeleteSeller(sellerId) {
+            const seller = sellers.find(s => s.id === sellerId);
+            if (!seller) {
+                showToast('Vendedor não encontrado!');
+                return;
+            }
+
+            // Store pending deletion info
+            pendingSellerDeletion = sellerId;
+
+            // Populate seller info in modal
+            const joinDate = seller.joinDate ? new Date(seller.joinDate).toLocaleDateString('pt-BR') : 'N/A';
+            const totalSales = seller.totalSales || 0;
+            const totalPoints = seller.totalPoints || 0;
+            const totalValue = seller.totalValue || 0;
+            
+            document.getElementById('deleteSellerInfo').innerHTML = `
+                <div class="space-y-2">
+                    <div><strong>Nome:</strong> ${seller.name}</div>
+                    <div><strong>Membro desde:</strong> ${joinDate}</div>
+                    <div><strong>Total de vendas:</strong> ${totalSales.toLocaleString('pt-BR')}</div>
+                    <div><strong>Total de pontos:</strong> ${totalPoints.toLocaleString('pt-BR')}</div>
+                    <div><strong>Faturamento total:</strong> R$ ${totalValue.toLocaleString('pt-BR')}</div>
+                    <div><strong>Vendas registradas:</strong> ${(seller.sales || []).length} vendas</div>
+                </div>
+            `;
+
+            // Show confirmation modal
+            showModal('deleteSellerModal');
+        }
+
+        function executeSellerDeletion() {
+            if (!pendingSellerDeletion) {
+                showToast('Nenhum vendedor selecionado para exclusão!');
+                return;
+            }
+
+            const sellerId = pendingSellerDeletion;
+            const sellerIndex = sellers.findIndex(s => s.id === sellerId);
+            
+            if (sellerIndex === -1) {
+                showToast('Vendedor não encontrado!');
+                hideModal('deleteSellerModal');
+                return;
+            }
+
+            const seller = sellers[sellerIndex];
+            const sellerName = seller.name;
+            const totalSales = seller.totalSales || 0;
+            const totalPoints = seller.totalPoints || 0;
+
+            // Remove seller from array
+            sellers.splice(sellerIndex, 1);
+
+            // Remove seller from last ranking positions
+            if (lastRankingPositions[sellerId]) {
+                delete lastRankingPositions[sellerId];
+            }
+
+            // Remove messages related to this seller
+            messages = messages.filter(message => message.sellerId !== sellerId);
+
+            // Save data
+            saveData();
+
+            // Update all displays
+            updateStats();
+            updateSellerSelect();
+            updateRankingsPage();
+            updatePerformancePage();
+            updateMessagesBadge();
+
+            // Close seller profile modal if it's open for this seller
+            if (window.currentProfileSeller && window.currentProfileSeller.id === sellerId) {
+                hideModal('sellerProfileModal');
+                window.currentProfileSeller = null;
+            }
+
+            // Hide modal and clear pending deletion
+            hideModal('deleteSellerModal');
+            pendingSellerDeletion = null;
+
+            showToast(`✅ Vendedor ${sellerName} excluído com sucesso!`);
+
+            // Generate system message about the deletion
+            generateMessage(
+                'alerts',
+                `🗑️ Vendedor excluído do sistema`,
+                `O vendedor ${sellerName} foi removido permanentemente do sistema pelo administrador. ${totalSales} vendas e ${totalPoints.toLocaleString('pt-BR')} pontos foram apagados.`,
+                'high'
+            );
+        }
+
+        function handleSellerSelectionChange() {
+            const select = document.getElementById('dashboardSellerSelect');
+            const deleteBtn = document.getElementById('deleteSelectedSellerBtn');
+            
+            if (select.value) {
+                deleteBtn.disabled = false;
+            } else {
+                deleteBtn.disabled = true;
+            }
+        }
+
+        function deleteSelectedSeller() {
+            const select = document.getElementById('dashboardSellerSelect');
+            const sellerId = select.value;
+            
+            if (!sellerId) {
+                showToast('Por favor, selecione um vendedor primeiro!');
+                return;
+            }
+            
+            confirmDeleteSeller(sellerId);
+        }
+
+        // ===== SELLER PROFILE FUNCTIONS =====
+
+        function showSellerProfile(sellerId) {
+            const seller = sellers.find(s => s.id === sellerId);
+            if (!seller) {
+                showToast('Vendedor não encontrado!');
+                return;
+            }
+
+            // Update profile info
+            const avatar = document.getElementById('sellerProfileAvatar');
+            if (seller.photo) {
+                avatar.style.backgroundImage = `url(${seller.photo})`;
+                avatar.style.backgroundSize = 'cover';
+                avatar.style.backgroundPosition = 'center';
+                avatar.textContent = '';
+            } else {
+                avatar.style.backgroundImage = '';
+                avatar.textContent = seller.name.charAt(0).toUpperCase();
+            }
+            document.getElementById('sellerProfileName').textContent = seller.name.toUpperCase();
+            
+            // Update category points
+            document.getElementById('sellerLentesPoints').textContent = `${(seller.lentesPoints || 0).toLocaleString('pt-BR')} pts`;
+            document.getElementById('sellerMateriaisPoints').textContent = `${(seller.materiaisPoints || 0).toLocaleString('pt-BR')} pts`;
+            document.getElementById('sellerTratamentosPoints').textContent = `${(seller.tratamentosPoints || 0).toLocaleString('pt-BR')} pts`;
+            document.getElementById('sellerSensityPoints').textContent = `${(seller.sensityPoints || 0).toLocaleString('pt-BR')} pts`;
+            document.getElementById('sellerChallengePoints').textContent = '0 pts'; // TODO: Implement challenge points
+            
+            // Update statistics
+            const avgPoints = seller.totalSales > 0 ? Math.round((seller.totalPoints || 0) / seller.totalSales) : 0;
+            const avgValue = seller.totalSales > 0 ? Math.round((seller.totalValue || 0) / seller.totalSales) : 0;
+            const joinDate = seller.joinDate ? new Date(seller.joinDate).toLocaleDateString('pt-BR') : 'N/A';
+            
+            // Calculate average discount percentage
+            let avgDiscount = 0;
+            if (seller.sales && seller.sales.length > 0) {
+                const salesWithDiscount = seller.sales.filter(sale => sale.discountPercentage !== undefined);
+                if (salesWithDiscount.length > 0) {
+                    const totalDiscount = salesWithDiscount.reduce((sum, sale) => sum + (sale.discountPercentage || 0), 0);
+                    avgDiscount = (totalDiscount / salesWithDiscount.length).toFixed(1);
+                }
+            }
+            
+            document.getElementById('sellerAvgPoints').textContent = `${avgPoints} pts`;
+            document.getElementById('sellerAvgValue').textContent = `R$ ${avgValue.toLocaleString('pt-BR')}`;
+            document.getElementById('sellerAvgDiscount').textContent = `${avgDiscount}%`;
+            document.getElementById('sellerJoinDate').textContent = joinDate;
+            
+            // Calculate and update specialist products (most sold by category)
+            updateSellerSpecialistProducts(seller);
+            
+            // Last sale
+            let lastSaleText = 'Nenhuma';
+            if (seller.sales && seller.sales.length > 0) {
+                const lastSale = seller.sales[seller.sales.length - 1];
+                lastSaleText = new Date(lastSale.date).toLocaleDateString('pt-BR');
+            }
+            document.getElementById('sellerLastSale').textContent = lastSaleText;
+            
+            // Completed challenges (placeholder)
+            document.getElementById('sellerCompletedChallenges').textContent = '0';
+            
+            // Update challenge progress
+            updateSellerChallengeProgress(seller);
+            
+            // Update recent sales
+            updateSellerRecentSales(seller);
+            
+            // Store current seller for export
+            window.currentProfileSeller = seller;
+            
+            // Show modal
+            showModal('sellerProfileModal');
+        }
+
+        function updateSellerChallengeProgress(seller) {
+            if (!seller.sales || seller.sales.length === 0) {
+                // Reset all progress to 0
+                document.getElementById('miyosmartProgress').textContent = '0/6';
+                document.getElementById('varietyProgress').textContent = '0/6';
+                document.getElementById('premium174Progress').textContent = '0/3';
+                document.getElementById('sensityWeeklyProgress').textContent = '0/6';
+                document.getElementById('lowDiscountProgress').textContent = '0/10';
+                document.getElementById('zeroDiscountProgress').textContent = '0/10';
+                document.getElementById('pointsGoalProgress').textContent = `0/20.000`;
+                document.getElementById('salesGoalProgress').textContent = `0/50`;
+                document.getElementById('sensityMonthlyProgress').textContent = '0/15';
+                document.getElementById('meiryoProgress').textContent = '0/15';
+                document.getElementById('myselfProgress').textContent = '0/6';
+                document.getElementById('lifestyleProgress').textContent = '0/6';
+                document.getElementById('miyosmartExpertProgress').textContent = '0/15';
+                
+                // Reset progress bars
+                updateProgressBar('miyosmartProgressBar', 0, 6);
+                updateProgressBar('varietyProgressBar', 0, 6);
+                updateProgressBar('premium174ProgressBar', 0, 3);
+                updateProgressBar('sensityWeeklyProgressBar', 0, 6);
+                updateProgressBar('lowDiscountProgressBar', 0, 10);
+                updateProgressBar('zeroDiscountProgressBar', 0, 10);
+                updateProgressBar('pointsGoalProgressBar', 0, 20000);
+                updateProgressBar('salesGoalProgressBar', 0, 50);
+                updateProgressBar('sensityMonthlyProgressBar', 0, 15);
+                updateProgressBar('meiryoProgressBar', 0, 15);
+                updateProgressBar('myselfProgressBar', 0, 6);
+                updateProgressBar('lifestyleProgressBar', 0, 6);
+                updateProgressBar('miyosmartExpertProgressBar', 0, 15);
+                return;
+            }
+
+            // Calculate challenge progress
+            let miyosmartCount = 0;
+            let lentesVariety = new Set(); // Only track lenses for variety
+            let premium174Count = 0;
+            let sensityCount = 0;
+            let meiryoCount = 0;
+            let myselfCount = 0;
+            let lifestyleCount = 0;
+
+            seller.sales.forEach(sale => {
+                Object.entries(sale.products || {}).forEach(([category, product]) => {
+                    if (product && product.name) {
+                        // Track variety - ONLY LENSES count for variety challenge
+                        if (category === 'lentes') {
+                            lentesVariety.add(product.name);
+                        }
+                        
+                        // Specific product counts
+                        if (product.name === 'MiYoSmart') miyosmartCount++;
+                        if (product.name === '1.74 EYVIA') premium174Count++;
+                        if (category === 'sensity') sensityCount++;
+                        if (product.name === 'Meiryo' || product.name === 'AR MiYoSmart') meiryoCount++;
+                        if (product.name === 'Myself') myselfCount++;
+                        if (product.name === 'Lifestyle') lifestyleCount++;
+                    }
+                });
+            });
+
+            // Calculate discount sales
+            let lowDiscountCount = 0; // ≤5%
+            let zeroDiscountCount = 0; // 0%
+            seller.sales.forEach(sale => {
+                if (sale.discountPercentage !== undefined) {
+                    if (sale.discountPercentage === 0) {
+                        zeroDiscountCount++;
+                    }
+                    if (sale.discountPercentage <= 5) {
+                        lowDiscountCount++;
+                    }
+                }
+            });
+
+            // Update weekly challenges
+            document.getElementById('miyosmartProgress').textContent = `${Math.min(miyosmartCount, 6)}/6`;
+            document.getElementById('varietyProgress').textContent = `${Math.min(lentesVariety.size, 6)}/6`;
+            document.getElementById('premium174Progress').textContent = `${Math.min(premium174Count, 3)}/3`;
+            document.getElementById('sensityWeeklyProgress').textContent = `${Math.min(sensityCount, 6)}/6`;
+            document.getElementById('lowDiscountProgress').textContent = `${Math.min(lowDiscountCount, 10)}/10`;
+            document.getElementById('zeroDiscountProgress').textContent = `${Math.min(zeroDiscountCount, 10)}/10`;
+            
+            // Update monthly challenges
+            document.getElementById('pointsGoalProgress').textContent = `${(seller.totalPoints || 0).toLocaleString('pt-BR')}/20.000`;
+            document.getElementById('salesGoalProgress').textContent = `${Math.min(seller.totalSales || 0, 50)}/50`;
+            document.getElementById('sensityMonthlyProgress').textContent = `${Math.min(sensityCount, 15)}/15`;
+            document.getElementById('meiryoProgress').textContent = `${Math.min(meiryoCount, 15)}/15`;
+            
+            // Update quarterly challenges
+            document.getElementById('myselfProgress').textContent = `${Math.min(myselfCount, 6)}/6`;
+            document.getElementById('lifestyleProgress').textContent = `${Math.min(lifestyleCount, 6)}/6`;
+            document.getElementById('miyosmartExpertProgress').textContent = `${Math.min(miyosmartCount, 15)}/15`;
+            
+            // Update progress bars with animation
+            updateProgressBar('miyosmartProgressBar', Math.min(miyosmartCount, 6), 6);
+            updateProgressBar('varietyProgressBar', Math.min(lentesVariety.size, 6), 6);
+            updateProgressBar('premium174ProgressBar', Math.min(premium174Count, 3), 3);
+            updateProgressBar('sensityWeeklyProgressBar', Math.min(sensityCount, 6), 6);
+            updateProgressBar('lowDiscountProgressBar', Math.min(lowDiscountCount, 10), 10);
+            updateProgressBar('zeroDiscountProgressBar', Math.min(zeroDiscountCount, 10), 10);
+            updateProgressBar('pointsGoalProgressBar', Math.min(seller.totalPoints || 0, 20000), 20000);
+            updateProgressBar('salesGoalProgressBar', Math.min(seller.totalSales || 0, 50), 50);
+            updateProgressBar('sensityMonthlyProgressBar', Math.min(sensityCount, 15), 15);
+            updateProgressBar('meiryoProgressBar', Math.min(meiryoCount, 15), 15);
+            updateProgressBar('myselfProgressBar', Math.min(myselfCount, 6), 6);
+            updateProgressBar('lifestyleProgressBar', Math.min(lifestyleCount, 6), 6);
+            updateProgressBar('miyosmartExpertProgressBar', Math.min(miyosmartCount, 15), 15);
+        }
+        
+        function updateProgressBar(barId, current, max) {
+            const progressBar = document.getElementById(barId);
+            if (!progressBar) return;
+            
+            const percentage = max > 0 ? (current / max) * 100 : 0;
+            
+            // Add neon effect if progress > 0
+            if (percentage > 0) {
+                progressBar.classList.add('neon-progress');
+            } else {
+                progressBar.classList.remove('neon-progress');
+            }
+            
+            // Animate the width change
+            setTimeout(() => {
+                progressBar.style.width = `${Math.min(percentage, 100)}%`;
+            }, 100);
+        }
+
+        function updateSellerRecentSales(seller) {
+            const recentSalesDiv = document.getElementById('sellerRecentSales');
+            
+            if (!seller.sales || seller.sales.length === 0) {
+                recentSalesDiv.innerHTML = '<div class="text-center text-slate-400 py-4">Nenhuma venda registrada</div>';
+                return;
+            }
+
+            // Get last 5 sales
+            const recentSales = seller.sales.slice(-5).reverse();
+            
+            recentSalesDiv.innerHTML = '';
+            
+            recentSales.forEach(sale => {
+                const saleDiv = document.createElement('div');
+                saleDiv.className = 'bg-slate-600/30 rounded-lg p-3 card-3d';
+                
+                const saleDate = new Date(sale.date).toLocaleDateString('pt-BR');
+                const products = Object.values(sale.products || {}).filter(p => p).map(p => p.name).join(', ');
+                
+                // Calculate discount bonus info
+                let discountBonusText = '';
+                if (sale.discountBonus === 50) {
+                    discountBonusText = '<div class="text-xs text-green-400 font-bold">🎉 +50 pts (Sem desconto)</div>';
+                } else if (sale.discountBonus === 20) {
+                    discountBonusText = '<div class="text-xs text-yellow-400 font-bold">🎯 +20 pts (Desconto ≤5%)</div>';
+                }
+                
+                const discountText = sale.discountPercentage !== undefined ? 
+                    `<div class="text-xs ${sale.discountPercentage === 0 ? 'text-green-400' : sale.discountPercentage <= 5 ? 'text-yellow-400' : 'text-red-400'}">Desconto: ${sale.discountPercentage.toFixed(1)}%</div>` : '';
+                
+                // Create detailed product breakdown
+                let productBreakdown = '';
+                let basePoints = 0;
+                if (sale.products && Object.keys(sale.products).length > 0) {
+                    const productDetails = [];
+                    Object.entries(sale.products).forEach(([category, product]) => {
+                        if (product && product.name && product.points) {
+                            productDetails.push(`${product.name} (${product.points}pts)`);
+                            basePoints += product.points;
+                        }
+                    });
+                    if (productDetails.length > 0) {
+                        productBreakdown = `<div class="text-xs text-slate-300 mb-1">${productDetails.join(', ')} = ${basePoints} pts</div>`;
+                    }
+                }
+
+                saleDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <div class="font-bold text-sm text-blue-300 futuristic-text">Pedido #${sale.orderId}</div>
+                            <div class="text-xs text-slate-400">${saleDate}</div>
+                            ${discountText}
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <div class="text-right">
+                                <div class="font-bold text-green-400">${sale.totalPoints} pts</div>
+                                <div class="text-xs text-slate-300">R$ ${(sale.value || 0).toLocaleString('pt-BR')}</div>
+                                ${discountBonusText}
+                            </div>
+                            <button onclick="confirmDeleteSale('${seller.id}', '${sale.id}')" class="text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-full w-6 h-6 flex items-center justify-center text-sm transition-all" title="Excluir venda">
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                    ${productBreakdown}
+                    ${sale.description ? `<div class="text-xs text-slate-400 mt-1">${sale.description}</div>` : ''}
+                `;
+                
+                recentSalesDiv.appendChild(saleDiv);
+            });
+        }
+
+        function triggerPhotoUpload() {
+            const seller = window.currentProfileSeller;
+            if (!seller) {
+                showToast('Nenhum vendedor selecionado.');
+                return;
+            }
+            document.getElementById('photoUpload').click();
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            const seller = window.currentProfileSeller;
+            
+            if (!file || !seller) return;
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showToast('Por favor, selecione apenas arquivos de imagem!');
+                return;
+            }
+            
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('A imagem deve ter no máximo 2MB!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                
+                // Update seller's photo in database
+                const sellerIndex = sellers.findIndex(s => s.id === seller.id);
+                if (sellerIndex !== -1) {
+                    sellers[sellerIndex].photo = imageData;
+                    saveData();
+                    
+                    // Update avatar display
+                    const avatar = document.getElementById('sellerProfileAvatar');
+                    avatar.style.backgroundImage = `url(${imageData})`;
+                    avatar.style.backgroundSize = 'cover';
+                    avatar.style.backgroundPosition = 'center';
+                    avatar.textContent = '';
+                    
+                    // Update current profile seller
+                    window.currentProfileSeller.photo = imageData;
+                    
+                    showToast('✅ Foto atualizada com sucesso!');
+                }
+            };
+            
+            reader.onerror = function() {
+                showToast('❌ Erro ao carregar a imagem. Tente novamente.');
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function updateSellerSpecialistProducts(seller) {
+            // Initialize counters for each category
+            const productCounts = {
+                lentes: {},
+                materiais: {},
+                tratamentos: {},
+                sensity: {}
+            };
+            
+            // Count products sold by category
+            if (seller.sales && seller.sales.length > 0) {
+                seller.sales.forEach(sale => {
+                    Object.entries(sale.products || {}).forEach(([category, product]) => {
+                        if (product && product.name && productCounts[category]) {
+                            productCounts[category][product.name] = (productCounts[category][product.name] || 0) + 1;
+                        }
+                    });
+                });
+            }
+            
+            // Find most sold product in each category
+            const topProducts = {};
+            Object.entries(productCounts).forEach(([category, products]) => {
+                if (Object.keys(products).length > 0) {
+                    const topProduct = Object.entries(products).reduce((max, [product, count]) => 
+                        count > (max[1] || 0) ? [product, count] : max, ['', 0]);
+                    topProducts[category] = topProduct[0] !== '' ? `${topProduct[0]} (${topProduct[1]}x)` : '-';
+                } else {
+                    topProducts[category] = '-';
+                }
+            });
+            
+            // Update display
+            document.getElementById('sellerTopLens').textContent = topProducts.lentes;
+            document.getElementById('sellerTopMaterial').textContent = topProducts.materiais;
+            document.getElementById('sellerTopTreatment').textContent = topProducts.tratamentos;
+            document.getElementById('sellerTopSensity').textContent = topProducts.sensity;
+        }
+
+        function exportSellerToPNG() {
+            const seller = window.currentProfileSeller;
+            if (!seller) {
+                showToast('Nenhum vendedor selecionado para exportar.');
+                return;
+            }
+
+            showToast('Preparando imagem do perfil... Aguarde!');
+
+            try {
+                const modalContent = document.querySelector('#sellerProfileModal .bg-slate-800\\/90');
+                
+                html2canvas(modalContent, {
+                    backgroundColor: '#0f172a',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: modalContent.scrollWidth,
+                    height: modalContent.scrollHeight
+                }).then(canvas => {
+                    // Create download link
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                    const fileName = `perfil-${seller.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.png`;
+                    
+                    link.download = fileName;
+                    link.href = canvas.toDataURL('image/png');
+                    
+                    // Trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showToast(`✅ Imagem do perfil de ${seller.name} baixada com sucesso!`);
+                }).catch(error => {
+                    console.error('Erro ao gerar PNG:', error);
+                    showToast('❌ Erro ao gerar imagem PNG. Tente novamente.');
+                });
+            } catch (error) {
+                console.error('Erro ao exportar PNG do vendedor:', error);
+                showToast('❌ Erro ao gerar imagem PNG. Tente novamente.');
+            }
+        }
+
+        function exportRankingToPNG() {
+            if (sellers.length === 0) {
+                showToast('Nenhum vendedor cadastrado para exportar.');
+                return;
+            }
+
+            showToast('Preparando imagem do ranking... Aguarde!');
+
+            try {
+                const rankingContent = document.getElementById('rankingContent');
+                
+                html2canvas(rankingContent, {
+                    backgroundColor: '#0f172a',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: rankingContent.scrollWidth,
+                    height: rankingContent.scrollHeight
+                }).then(canvas => {
+                    // Create download link
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                    const fileName = `ranking-torneio-vendas-${timestamp}.png`;
+                    
+                    link.download = fileName;
+                    link.href = canvas.toDataURL('image/png');
+                    
+                    // Trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showToast('✅ Imagem do ranking baixada com sucesso!');
+                }).catch(error => {
+                    console.error('Erro ao gerar PNG:', error);
+                    showToast('❌ Erro ao gerar imagem PNG. Tente novamente.');
+                });
+            } catch (error) {
+                console.error('Erro ao exportar PNG do ranking:', error);
+                showToast('❌ Erro ao gerar imagem PNG. Tente novamente.');
+            }
+        }
+
+        function exportPerformanceToPNG() {
+            if (sellers.length === 0) {
+                showToast('Nenhum vendedor cadastrado para exportar.');
+                return;
+            }
+
+            showToast('Preparando imagem da performance... Aguarde!');
+
+            try {
+                const performanceContent = document.getElementById('performanceContent');
+                
+                html2canvas(performanceContent, {
+                    backgroundColor: '#0f172a',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: performanceContent.scrollWidth,
+                    height: performanceContent.scrollHeight
+                }).then(canvas => {
+                    // Create download link
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                    const fileName = `performance-torneio-vendas-${timestamp}.png`;
+                    
+                    link.download = fileName;
+                    link.href = canvas.toDataURL('image/png');
+                    
+                    // Trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showToast('✅ Imagem da performance baixada com sucesso!');
+                }).catch(error => {
+                    console.error('Erro ao gerar PNG:', error);
+                    showToast('❌ Erro ao gerar imagem PNG. Tente novamente.');
+                });
+            } catch (error) {
+                console.error('Erro ao exportar PNG da performance:', error);
+                showToast('❌ Erro ao gerar imagem PNG. Tente novamente.');
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'984eef7aa2bc0a7a',t:'MTc1ODg0OTU5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
